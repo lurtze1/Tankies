@@ -38,20 +38,61 @@ var Tank = function (pos) {
     // Amount of pixels moved in a second.
     this.speed = 200;
 
+    //Indicates if a object is solid for collition.
+    this.solid = true;
+
+    //Indicates if this object cannot be moved
+    this.heavy = false;
+
     //Polygon holds angle, position, size, offset.
     this.polygon = P(V(pos), [V(20, 20), V(-20, 20), V(-20, -20), V(20, -20), V(20, 0)]);
+
 };
+
+
+Tank.prototype = {
+    respondtoCollision: function (other, response) {
+        if (this.solid && other.solid && !(this.heavy && other.heavy)) {
+            if (this.heavy) {
+                // Move the other object out of us
+                other.pos.add(response.overlapV);
+            } else if (other.heavy) {
+                // Move us out of the other object
+                this.pos.sub(response.overlapV);
+            } else {
+                // Move equally out of each other
+                response.overlapV.scale(0.5);
+                this.pos.sub(response.overlapV);
+                other.pos.add(response.overlapV);
+            }
+        }
+    }
+};
+
+var Wall = function (pos) {
+    //Current position in pixels, based on a vector;
+    this.pos = pos;
+
+    //Indicates if this object is solid for collition
+    this.solid = true;
+
+    //Indicates if this object cannot be moved
+    this.heavy = true;
+
+    //Polygon holds angle, postion, size, offset.
+    this.polygon = P(V(pos), [V(20, 20), V(-20, 20), V(-20, -20), V(20, -20), V(20, 0)]);
+};
+
 var game = function () {
     var canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
-    canvas.width = 500;
-    canvas.height = 500;
+    canvas.width = 1000;
+    canvas.height = 1000;
     document.body.appendChild(canvas);
 
-
+    var entities = [];
     var bgReady = false;
-    var bgImage = new Image();
-
+    var bgImage = new Image(500, 500);
     bgImage.onload = function () {
         bgReady = true;
     };
@@ -60,6 +101,8 @@ var game = function () {
 
     var TankReady = false;
     var TankImage = new Image();
+    TankImage.width = 60;
+    TankImage.height = 30;
     TankImage.onload = function () {
         TankReady = true;
     };
@@ -82,8 +125,30 @@ var game = function () {
         tank.pos.y = canvas.height / 2;
     };
 
+
+    var Collision = function (loopCount) {
+        var loopCount = loopCount;
+        for (var i = 0; i < loopCount; i++) {
+            // Naively check for collision between all pairs of entities
+            // E.g if there are 4 entities: (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
+            for (var aCount = 0; aCount < entities.length; aCount++) {
+                var a = entities[aCount];
+                for (var bCount = aCount + 1; bCount < entities.length; bCount++) {
+                    var b = entities[bCount];
+                    this.response.clear();
+                    var collided;
+                    var aData = a.data;
+                    var bData = b.data;
+                    collided = SAT.testPolygonPolygon(aData, bData, this.response);
+                }
+                if (collided) {
+                    a.respondToCollision(b, this.response);
+                }
+            }
+        }
+    };
+
     var update = function (modifier) {
-        console.log(tank.pos);
         if (87 in keysDown) { // Player holding up
             tank.pos.y -= tank.speed * modifier;
         }
@@ -96,6 +161,8 @@ var game = function () {
         if (68 in keysDown) { // Player holding right
             tank.pos.x += tank.speed * modifier;
         }
+
+
     };
 
     var render = function () {
@@ -123,11 +190,9 @@ var game = function () {
         requestAnimationFrame(Start);
     };
 
+
     var then = Date.now();
 
     reset();
     Start();
 };
-
-game();
-game();
