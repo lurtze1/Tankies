@@ -327,6 +327,7 @@
                 edges.push(new Vector());
                 normals.push(new Vector());
             }
+
         }
         this['points'] = points;
         this._recalc();
@@ -641,6 +642,7 @@
         }
         // This is not a separating axis. If we're calculating a response, calculate the overlap.
         if (response) {
+
             var overlap = 0;
             // A starts further left than B
             if (rangeA[0] < rangeB[0]) {
