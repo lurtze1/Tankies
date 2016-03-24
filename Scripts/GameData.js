@@ -51,9 +51,9 @@ var Tank = function (x, y, playerID) {
     this.turnspeed = 180 * TO_RADIANS;
 
     //Polygon holds angle, position, size, offset.
-    this.polygon = P(V(x - (this.width / 2), y - (this.height / 2)), [V(-30, -30), V(30, -30), V(30, 0), V(-30, 0)]);
-
+    this.polygon = P(V(x, y), [V(0, 0), V(60, 0), V(60, 30), V(0, 30)]);
     this.angle = this.polygon.angle;
+    this.polygon.translate(-this.width / 2, -this.height / 2);
 
 };
 
@@ -67,7 +67,6 @@ function rotateAndPaintImage(context, image, Entity) {
 
 // rotate around this point
     context.rotate(Entity.polygon.angle);
-
 // then draw the image back and up
     var anticlockwise = true;
     context.beginPath();
@@ -80,6 +79,7 @@ function rotateAndPaintImage(context, image, Entity) {
     }
     context.closePath();
 
+
     context.fillStyle = "rgba(227,11,93,0.75)";
     context.fill();
     context.stroke();
@@ -87,7 +87,7 @@ function rotateAndPaintImage(context, image, Entity) {
     context.clip();
 
     context.restore();
-    dd
+
 }
 
 var Wall = function (x, y) {
@@ -177,8 +177,6 @@ var game = function game() {
                 self.polygon.pos.sub(response.overlapV);
                 other.polygon.pos.add(response.overlapV);
             }
-            console.log(self.polygon.pos.x + " " + self.polygon.pos.y + " other: " + other.polygon.pos.x + " " + other.polygon.pos.y);
-            console.log(self.polygon.angle * TO_DEGREES);
         }
     };
 
@@ -243,12 +241,6 @@ var game = function game() {
 
         render();
     };
-
-    var checkforCollition = function (a, b) {
-
-
-        return collided;
-    };
     var update = function (modifier) {
         var speed = LocalPlayer.speed;
         var angle = LocalPlayer.polygon.angle;
@@ -268,7 +260,8 @@ var game = function game() {
             LocalPlayer.polygon.pos.x -= velocity_x * modifier;
             LocalPlayer.polygon.pos.y += velocity_y * modifier;
         }
-        LocalPlayer.polygon.setAngle(angle);
+        LocalPlayer.polygon.angle = angle;
+        LocalPlayer.polygon._recalc();
     };
 
     var render = function () {
