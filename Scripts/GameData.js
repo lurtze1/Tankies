@@ -58,17 +58,42 @@ var Tank = function (x, y, playerID) {
 };
 
 
-function rotateAndPaintImage(context, image, Entity) {
+function PaintWalls(context, walls) {
     context.save();
-
+    var anticlockwise = true;
+    context.beginPath();
+    for (var ii = 0; ii < walls.length; ii++) {
 // now move across and down half the
 // width and height of the image (which is 128 x 128)
-    context.translate(Entity.polygon.pos.x, Entity.polygon.pos.y);
+        context.translate(walls[ii].polygon.pos.x, walls[ii].polygon.pos.y);
+        var entitypoint = walls[ii].polygon.points;
+        var a = (Math.PI * 2) / 4;
+        a = anticlockwise ? -a : a;
+        context.moveTo(walls[ii].polygon.pos.x, walls[ii].polygon.pos.y);
+        for (var i = 0; i < entitypoint.length; i++) {
+            context.lineTo(entitypoint[i].x, entitypoint[i].y);
+        }
 
+
+        context.fillStyle = "rgba(227,11,93,0.75)";
+        context.fill();
+    }
+    context.closePath();
+
+    context.stroke();
+
+    context.clip();
+
+    context.restore();
+
+}
+
+function PaintPlayer(context, Entity) {
+    context.save();
+    context.translate(Entity.polygon.pos.x, Entity.polygon.pos.y);
+    var anticlockwise = true;
 // rotate around this point
     context.rotate(Entity.polygon.angle);
-// then draw the image back and up
-    var anticlockwise = true;
     context.beginPath();
     var entitypoint = Entity.polygon.points;
     var a = (Math.PI * 2) / 4;
@@ -78,9 +103,7 @@ function rotateAndPaintImage(context, image, Entity) {
         context.lineTo(entitypoint[i].x, entitypoint[i].y);
     }
     context.closePath();
-
-
-    context.fillStyle = "rgba(227,11,93,0.75)";
+    context.fillStyle = "rgba(0,255,0,1)";
     context.fill();
     context.stroke();
 
@@ -90,7 +113,7 @@ function rotateAndPaintImage(context, image, Entity) {
 
 }
 
-var Wall = function (x, y) {
+var Wall = function (x, y, length, width) {
 
 
     //Indicates if this object is solid for collition
@@ -99,13 +122,13 @@ var Wall = function (x, y) {
     //Indicates if this object cannot be moved
     this.heavy = true;
 
-    this.width = 20;
+    this.width = width;
 
-    this.height = 20;
+    this.height = length;
 
 
     //Polygon holds angle, postion, size, offset.
-    this.polygon = P(V(x, y), [V(0, 0), V(20, 0), V(20, 20), V(0, 20)]);
+    this.polygon = P(V(x, y), [V(0, 0), V(length, 0), V(length, width), V(0, width)]);
 
 };
 
@@ -121,6 +144,7 @@ var game = function game() {
     This.response = new SAT.Response();
     var canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "xor";
     canvas.width = 800;
     canvas.height = 800;
     document.body.appendChild(canvas);
@@ -208,8 +232,6 @@ var game = function game() {
 
 
     var Collision = function (loopCount) {
-        update(delta / 1000);
-
         for (var i = 0; i < loopCount; i++) {
             // Naively check for collision between all pairs of entities
             // E.g if there are 4 entities: (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
@@ -238,7 +260,7 @@ var game = function game() {
                 }
             }
         }
-
+        update(delta / 1000);
         render();
     };
     var update = function (modifier) {
@@ -269,52 +291,24 @@ var game = function game() {
             ctx.drawImage(bgImage, 0, 0);
         }
         if (TankReady) {
-            rotateAndPaintImage(ctx, TankImage, LocalPlayer);
+            PaintPlayer(ctx, LocalPlayer);
         }
-        if (WallReady) {
-            for (var i = 0; i < walls.length; i++) {
-                var data = walls[i];
-                ctx.drawImage(WallImage, data.polygon.pos.x, data.polygon.pos.y);
-            }
-        }
+        PaintWalls(ctx, walls);
     };
     var addWalls = function () {
-        var x;
-        var y;
         var wall;
-        for (var iTop = 0; iTop < canvas.width / 20; iTop++) {
-            x = (20 * iTop);
-            y = 0;
-            wall = new Wall(x, y);
-            walls.push(wall);
-            entities.push(wall);
-        }
-        for (var iBottom = 0; iBottom < canvas.width / 20; iBottom++) {
-            x = (20 * iBottom);
-            y = canvas.height - 20;
-            wall = new Wall(x, y);
-            walls.push(wall);
-            entities.push(wall);
-        }
-        for (var iLeft = 0; iLeft < canvas.width / 20; iLeft++) {
-            x = (0);
-            y = (20 * iLeft);
-            wall = new Wall(x, y);
-            walls.push(wall);
-            entities.push(wall);
-        }
-        for (var iRight = 0; iRight < canvas.width / 20; iRight++) {
-            x = canvas.width - 20;
-            y = (20 * iRight);
-            wall = new Wall(x, y);
-            walls.push(wall);
-            entities.push(wall);
-        }
-
-        /* wall = new Wall(200,200);
-         walls.push(wall);
-         entities.push(wall);*/
-
+        wall = new Wall(0, 0, 800, 21);
+        walls.push(wall);
+        entities.push(wall);
+        wall = new Wall(0, 780, 800, 21);
+        walls.push(wall);
+        entities.push(wall);
+        wall = new Wall(780, 0, 21, 800);
+        walls.push(wall);
+        entities.push(wall);
+        wall = new Wall(0, 0, 21, 800);
+        walls.push(wall);
+        entities.push(wall);
 
     };
     var Start = function () {
