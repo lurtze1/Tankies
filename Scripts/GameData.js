@@ -62,9 +62,9 @@ var game = function game() {
         var then = Date.now();
 
 
-        var Tank = function (x, y, playerID) {
+        var Tank = function (x, y, playerID, team) {
             //Team of the player, can be null.
-            this.team = 1;
+            this.team = team || 1;
 
             //Player ID
             this.playerID = playerID;
@@ -206,19 +206,19 @@ var game = function game() {
 
         var addPlayer = function () {
             if (playerList[0] == undefined) {
-                LocalPlayer = new Tank(100, 100, 1);
+                LocalPlayer = new Tank(100, 100, 1,1);
                 entities.push(LocalPlayer);
                 playerList[0] = LocalPlayer;
             } else if (playerList[1] == undefined) {
-                LocalPlayer = new Tank(650, 650, 2);
+                LocalPlayer = new Tank(650, 650, 2,1);
                 entities.push(LocalPlayer);
                 playerList[1] = LocalPlayer;
             } else if (playerList[2] == undefined) {
-                LocalPlayer = new Tank(50, 95, 3);
+                LocalPlayer = new Tank(50, 95, 3,1);
                 entities.push(LocalPlayer);
                 playerList[2] = LocalPlayer;
             } else if (playerList[3] == undefined) {
-                LocalPlayer = new Tank(650, 50, 4);
+                LocalPlayer = new Tank(650, 50, 4,1);
                 entities.push(LocalPlayer);
                 playerList[3] = LocalPlayer;
             }
@@ -259,6 +259,7 @@ var game = function game() {
                                 b.todelete = true;
                             }
                         }
+
                         if (collided) {
                             if (a instanceof Tank) {
                                 respondToCollision(a, b, This.response);
@@ -320,16 +321,8 @@ var game = function game() {
             if (bgReady) {
                 ctx.drawImage(bgImage, 0, 0);
             }
-            if (TankReady) {
-                PaintEntity(ctx, LocalPlayer);
-            }
-            for (var i = 0; i < walls.length; i++) {
-                PaintEntity(ctx, walls[i]);
-            }
             for (var ii = 0; ii < entities.length; ii++) {
-                if (entities[ii] instanceof Bullet) {
                     PaintEntity(ctx, entities[ii]);
-                }
             }
         };
         var addWalls = function () {
@@ -361,6 +354,8 @@ var game = function game() {
 
 
         addPlayer();
+    addPlayer();
+    addPlayer();
         addWalls();
 
         Start();
