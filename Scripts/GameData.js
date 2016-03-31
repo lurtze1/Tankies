@@ -64,7 +64,7 @@ var game = function game() {
 
         var Tank = function (x, y, playerID, team) {
             //Team of the player, can be null.
-            this.team = team || 1;
+            this.team = team;
 
             //Player ID
             this.playerID = playerID;
@@ -210,18 +210,19 @@ var game = function game() {
                 entities.push(LocalPlayer);
                 playerList[0] = LocalPlayer;
             } else if (playerList[1] == undefined) {
-                LocalPlayer = new Tank(650, 650, 2,1);
+                LocalPlayer = new Tank(650, 650, 2,2);
                 entities.push(LocalPlayer);
                 playerList[1] = LocalPlayer;
             } else if (playerList[2] == undefined) {
-                LocalPlayer = new Tank(50, 95, 3,1);
+                LocalPlayer = new Tank(50, 650, 3,3);
                 entities.push(LocalPlayer);
                 playerList[2] = LocalPlayer;
             } else if (playerList[3] == undefined) {
-                LocalPlayer = new Tank(650, 50, 4,1);
+                LocalPlayer = new Tank(650, 50, 4,4);
                 entities.push(LocalPlayer);
                 playerList[3] = LocalPlayer;
             }
+            console.log(playerList);
         };
 
         var reset = function () {
@@ -259,9 +260,15 @@ var game = function game() {
                                 b.todelete = true;
                             }
                         }
+                        if (a.istank && b.isbullet && a.team != b.team){
+                            collided = SAT.testPolygonPolygon(aData, bData, This.response);
+                            if (collided) {
+                                b.todelete = true;
+                            }
+                        }
 
                         if (collided) {
-                            if (a instanceof Tank) {
+                            if (a instanceof Tank && !b.isbullet) {
                                 respondToCollision(a, b, This.response);
                                 This.response.clear();
                             }
