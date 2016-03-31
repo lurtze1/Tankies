@@ -21,6 +21,7 @@ var TO_RADIANS = Math.PI / 180;
 var TO_DEGREES = 180 / Math.PI;
 
 
+
 var game = function game() {
     var This = game;
     This.response = new SAT.Response();
@@ -62,6 +63,23 @@ var game = function game() {
     var then = Date.now();
 
 
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    }
+
+    var Turret = function (Tank) {
+        this.width = 20;
+        this.height = 6;
+        this.polygon = P(V(Tank.polygon.pos.x, Tank.polygon.pos.y), [V(0, 0), V(this.width, 0), V(this.width, this.height), V(0, this.height)]);
+        this.polygon.translate(0, -this.height / 2);
+        this.solid = false;
+        this.heavy = false;
+    };
+
     var Tank = function (x, y, playerID, team) {
         this.lifes = 3;
         //Team of the player, can be null.
@@ -97,7 +115,7 @@ var game = function game() {
         this.polygon = P(V(x, y), [V(0, 0), V(60, 0), V(60, 30), V(0, 30)]);
         this.angle = this.polygon.angle;
         this.polygon.translate(-this.width / 2, -this.height / 2);
-
+        this.turret = new Turret(this);
     };
 
     function PaintEntity(context, Entity) {
@@ -117,12 +135,12 @@ var game = function game() {
         context.closePath();
         if (Entity instanceof Tank) {
             context.fillStyle = "#4CD64C";
-        }
-        if (Entity instanceof Bullet) {
+        } else if (Entity instanceof Bullet) {
             context.fillStyle = "#D64C4C";
-        }
-        if (Entity instanceof Wall) {
+        } else if (Entity instanceof Wall) {
             context.fillStyle = "#4C4CD6";
+        } else if (Entity instanceof Turret) {
+
         }
         context.fill();
         context.stroke();
@@ -171,7 +189,7 @@ var game = function game() {
     var Fire = function () {
         if (LocalPlayer.CurrentCooldown >= 60) {
             var bullet;
-            bullet = new Bullet(LocalPlayer.team, LocalPlayer.polygon.angle, LocalPlayer.polygon.pos);
+            bullet = new Bullet(LocalPlayer.team, LocalPlayer.turret.polygon.angle, LocalPlayer.polygon.pos);
             entities.push(bullet);
             bulletList.push(bullet);
             LocalPlayer.CurrentCooldown = 0;
@@ -210,18 +228,22 @@ var game = function game() {
             LocalPlayer = new Tank(100, 100, 1, 1);
             entities.push(LocalPlayer);
             playerList[0] = LocalPlayer;
+            entities.push(LocalPlayer.turret)
         } else if (playerList[1] == undefined) {
             LocalPlayer = new Tank(650, 650, 2, 2);
             entities.push(LocalPlayer);
             playerList[1] = LocalPlayer;
+            entities.push(LocalPlayer.turret)
         } else if (playerList[2] == undefined) {
             LocalPlayer = new Tank(50, 650, 3, 3);
             entities.push(LocalPlayer);
             playerList[2] = LocalPlayer;
+            entities.push(LocalPlayer.turret)
         } else if (playerList[3] == undefined) {
             LocalPlayer = new Tank(650, 50, 4, 4);
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
+            entities.push(LocalPlayer.turret)
         }
         console.log(playerList);
     };
@@ -304,10 +326,21 @@ var game = function game() {
         if (32 in keysDown) {
             Fire();
         }
+        LocalPlayer.turret.polygon.pos.x = LocalPlayer.polygon.pos.x;
+        LocalPlayer.turret.polygon.pos.y = LocalPlayer.polygon.pos.y;
         LocalPlayer.polygon.angle = angle;
         LocalPlayer.polygon._recalc();
     };
 
+    var Aim = function (e) {
+        var pos = getMousePos(canvas, e);
+        posx = pos.x - LocalPlayer.turret.polygon.pos.x;
+        posy = pos.y - LocalPlayer.turret.polygon.pos.y;
+        angle = Math.atan2(posx, posy);
+        LocalPlayer.turret.polygon.angle = -(angle) + 90 * TO_RADIANS;
+        LocalPlayer.turret.polygon._recalc();
+
+    };
     var updateBullets = function (modifier) {
         LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
         for (var i = 0; i < entities.length; i++) {
@@ -374,6 +407,8 @@ var game = function game() {
         requestAnimationFrame(Start);
     };
 
+
+    window.addEventListener('mousemove', Aim, false);
 
     addPlayer();
     addPlayer();
