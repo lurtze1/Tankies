@@ -443,4 +443,5 @@ var game1 = new game();
 game1.addWalls();
 game1.addPlayer();
 game1.addPlayer();
-game1.Start();*/
+game1.Start();
+*/
