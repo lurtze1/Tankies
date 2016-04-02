@@ -1,5 +1,5 @@
 //======commented voor connectie met server die nog niet werkt======
-var socket = io.connect('http://localhost:8080');
+//var socket = io.connect('http://localhost:8080');
 //======commented voor connectie met server die nog niet werkt======
 
 // Contructor for Vector, made shorter for simplicity
@@ -40,6 +40,8 @@ var game = function game() {
     var playerList = [];
     var bulletList = [];
     var bgReady = false;
+
+    //for images first you create an object, then you have to define an onload and then define a source.
     var bgImage = new Image(500, 500);
     bgImage.onload = function () {
         bgReady = true;
@@ -65,7 +67,7 @@ var game = function game() {
     var delta;
     var then = Date.now();
 
-//======commented voor connectie met server die nog niet werkt======
+/*//======commented voor connectie met server die nog niet werkt======
     //functies voor updaten player & entity list
 
     function UpdateEntityList(entityList){
@@ -98,7 +100,7 @@ var game = function game() {
             //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
         }
     });
-    //======commented voor connectie met server die nog niet werkt======
+    //======commented voor connectie met server die nog niet werkt======*/
 
     var Tank = function (x, y, playerID, team) {
         this.lifes = 3;
@@ -154,7 +156,16 @@ var game = function game() {
         }
         context.closePath();
         if (Entity instanceof Tank) {
-            context.fillStyle = "#4CD64C";
+
+            //for youri how to do image
+            /*if(TankReady){
+                var pattern = ctx.createPattern(TankImage,"repeat");
+                context.fillStyle = pattern;
+            }else{*/
+                context.fillStyle = "#4CD64C";
+            //}
+
+
         }
         if (Entity instanceof Bullet) {
             context.fillStyle = "#D64C4C";
@@ -397,8 +408,8 @@ var game = function game() {
 
     };
     var Start = function () {
-        entities = getEntityList();
-        playerList = getPlayerList();
+       // entities = getEntityList();
+       // playerList = getPlayerList();
         now = Date.now();
         delta = now - then;
         updatePlayer(delta / 1000);
@@ -408,14 +419,14 @@ var game = function game() {
 
         then = now;
 
-        UpdateEntityList(entities);
-        updatePlayerList(playerList);
+      //  UpdateEntityList(entities);
+       // updatePlayerList(playerList);
         
         requestAnimationFrame(Start);
     };
 
 
-    Start();
+
     return{
         Start: Start,
         addPlayer: addPlayer,
@@ -425,4 +436,8 @@ var game = function game() {
 
 };
 
-game();
+var game1 = new game();
+game1.addWalls();
+game1.addPlayer();
+game1.addPlayer();
+game1.Start();
