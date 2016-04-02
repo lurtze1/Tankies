@@ -367,6 +367,9 @@ var game = function game() {
         Collision(5);
 
         then = now;
+
+
+        
         requestAnimationFrame(Start);
     };
 
