@@ -20,6 +20,10 @@ PageApp.config(function($routeProvider) {
             templateUrl : 'pages/Credits.html',
             controller  : 'CreditsController'
         })
+        .when('/Game', {
+            templateUrl : 'pages/Game.html',
+            controller  : 'GameController'
+        })
 
         .otherwise({redirectTo: '/'});
 });
@@ -33,5 +37,8 @@ PageApp.controller('HowToPlayController', function($scope) {
 });
 
 PageApp.controller('CreditsController', function($scope) {
+
+});
+PageApp.controller('GameController', function($scope) {
 
 });

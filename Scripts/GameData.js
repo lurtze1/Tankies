@@ -33,7 +33,7 @@ var game = function game() {
     ctx.globalCompositeOperation = "xor";
     canvas.width = 800;
     canvas.height = 800;
-    document.body.appendChild(canvas);
+    document.getElementById("Game").appendChild(canvas);
     var LocalPlayer;
     var entities = [];
     var walls = [];
@@ -437,6 +437,13 @@ var game = function game() {
     }
 
 };
+function GameStart() {
+    var game1 = new game();
+    game1.addWalls();
+    game1.addPlayer();
+    game1.addPlayer();
+    game1.Start();
+}
 
 /* Aanmaken van een game
 var game1 = new game();
