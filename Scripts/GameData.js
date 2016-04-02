@@ -192,8 +192,7 @@ var game = function game() {
             if (self.heavy) {
                 // Move the other object out of us
                 other.polygon.pos.add(response.overlapV);
-            }
-            if (other.heavy) {
+            } else if (other.heavy) {
                 // Move us out of the other object
                 self.polygon.pos.sub(response.overlapV);
             } else {
@@ -246,22 +245,19 @@ var game = function game() {
                     var collided;
                     var aData = a.polygon;
                     var bData = b.polygon;
-                    if (a instanceof Tank && b instanceof Tank && a.playerID != b.playerID) {
+                    if (a instanceof Tank && b instanceof Tank && a.playerID != b.playerID|| b.istank && a.istank && a.playerID != b.playerID) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a instanceof Tank && b instanceof Wall) {
+                    if (a instanceof Tank && b instanceof Wall || b.istank && a instanceof Wall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a instanceof Tank && b instanceof Bullet && b.team != a.team) {
-                        collided = SAT.testPolygonPolygon(aData, bData, This.response);
-                    }
-                    if (a instanceof Wall && b.isbullet) {
+                    if (a instanceof Wall && b.isbullet || a.isbullet && b instanceof Wall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                         if (collided) {
                             b.todelete = true;
                         }
                     }
-                    if (a.istank && b.isbullet && a.team != b.team) {
+                    if (a.istank && b.isbullet && a.team != b.team || b.istank && a.isbullet && a.team != b.team) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                         if (collided) {
                             b.todelete = true;
@@ -270,11 +266,11 @@ var game = function game() {
                     }
 
                     if (collided) {
-                        if (a instanceof Tank && !b.isbullet) {
+                        if (a instanceof Tank && !b.isbullet || b.istank && !a.isbullet) {
                             respondToCollision(a, b, This.response);
-                            This.response.clear();
                         }
                     }
+                    This.response.clear();
                 }
 
             }
@@ -375,12 +371,14 @@ var game = function game() {
     };
 
 
-    addPlayer();
-    addPlayer();
-    addPlayer();
-    addWalls();
-
     Start();
+    return{
+        Start: Start,
+        addPlayer: addPlayer,
+        addWalls: addWalls
+
+    }
+
 };
 
 game();
