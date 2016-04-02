@@ -374,11 +374,13 @@ var game = function game() {
         requestAnimationFrame(Start);
     };
 
-    return {
-        Start: Start,
-        addPlayer: addPlayer,
-    }
+
+    addPlayer();
+    addPlayer();
+    addPlayer();
+    addWalls();
+
+    Start();
 };
 
-var game1 = new game();
-game1.Start();
+game();
