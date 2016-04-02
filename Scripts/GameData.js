@@ -1,5 +1,5 @@
 //======commented voor connectie met server die nog niet werkt======
-//var socket = io.connect('http://localhost:8080');
+var socket = io.connect('http://localhost:8080');
 //======commented voor connectie met server die nog niet werkt======
 
 // Contructor for Vector, made shorter for simplicity
@@ -65,7 +65,7 @@ var game = function game() {
     var delta;
     var then = Date.now();
 
-/* //======commented voor connectie met server die nog niet werkt======
+//======commented voor connectie met server die nog niet werkt======
     //functies voor updaten player & entity list
 
     function UpdateEntityList(entityList){
@@ -98,7 +98,7 @@ var game = function game() {
             //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
         }
     });
-*/ //======commented voor connectie met server die nog niet werkt======
+    //======commented voor connectie met server die nog niet werkt======
 
     var Tank = function (x, y, playerID, team) {
         this.lifes = 3;
@@ -397,6 +397,8 @@ var game = function game() {
 
     };
     var Start = function () {
+        entities = getEntityList();
+        playerList = getPlayerList();
         now = Date.now();
         delta = now - then;
         updatePlayer(delta / 1000);
@@ -406,7 +408,8 @@ var game = function game() {
 
         then = now;
 
-
+        UpdateEntityList(entities);
+        updatePlayerList(playerList);
         
         requestAnimationFrame(Start);
     };
