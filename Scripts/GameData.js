@@ -47,6 +47,8 @@ var game = function game() {
         bgReady = true;
     };
     bgImage.src = "Images/Background.jpg";
+
+
     var TankReady = false;
     var TankImage = new Image();
     TankImage.width = 60;
