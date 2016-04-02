@@ -1,3 +1,7 @@
+//======commented voor connectie met server die nog niet werkt======
+//var socket = io.connect('http://localhost:8080');
+//======commented voor connectie met server die nog niet werkt======
+
 // Contructor for Vector, made shorter for simplicity
 var V = function (x, y) {
     return new SAT.Vector(x, y);
@@ -61,6 +65,40 @@ var game = function game() {
     var delta;
     var then = Date.now();
 
+/* //======commented voor connectie met server die nog niet werkt======
+    //functies voor updaten player & entity list
+
+    function UpdateEntityList(entityList){
+        socket.emit('updateEntityList', entityList);
+    }
+
+    function getEntityList(){
+        socket.emit('getEntityList');
+    }
+
+
+    function getPlayerList(){
+        socket.emit('getPlayerList');
+    }
+
+    function updatePlayerList(){
+        socket.emit('updatePlayerList', playerList);
+    }
+
+    socket.on('LatestUpdatedEntityList', function(entityList){
+       entities = entityList;
+    });
+
+    socket.on('LatestUpdatedPlayerList', function(PlayerList){
+        playerList = PlayerList;
+    });
+
+    socket.on('updatedPlayerList', function(bool){
+        if(!bool){
+            //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
+        }
+    });
+*/ //======commented voor connectie met server die nog niet werkt======
 
     var Tank = function (x, y, playerID, team) {
         this.lifes = 3;
