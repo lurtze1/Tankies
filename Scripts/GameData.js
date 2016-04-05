@@ -136,12 +136,16 @@ var game = function game() {
         this.turnspeed = 180 * TO_RADIANS;
 
         //Polygon holds angle, position, size, offset.
-        this.polygon = P(V(x, y), [V(0, 0), V(60, 0), V(60, 30), V(0, 30)]);
+        this.polygon = P(V(x, y), [V(0, 0), V(60, 0), V(75, 15), V(60, 30), V(0, 30)]);
         this.angle = this.polygon.angle;
         this.polygon.translate(-this.width / 2, -this.height / 2);
 
     };
 
+
+    //paints all the polygons of an entity. Might be rewritten to images.
+    //Currently paints a polygon in the provided context. It does this by defining the polygon on the context and then filling the context.
+    //The decision on how to fill it is made by checking the instance of the Entity.
     function PaintEntity(context, Entity) {
         context.save();
         context.translate(Entity.polygon.pos.x, Entity.polygon.pos.y);
@@ -184,6 +188,9 @@ var game = function game() {
 
     }
 
+
+    //Constructor for a wall object.
+    //Takes a topleft starting postion and a width and length.
     var Wall = function (x, y, length, width) {
 
 
@@ -203,6 +210,8 @@ var game = function game() {
 
     };
 
+
+    //Creates a bullet.
     function Bullet(team, angle, pos) {
         this.width = 10;
         this.height = 10;
@@ -219,6 +228,8 @@ var game = function game() {
         this.polygon._recalc();
     }
 
+
+    //For the local player, checks if the player can fire and if he can fires the gun for the localplayer.
     var Fire = function () {
         if (LocalPlayer.CurrentCooldown >= 60) {
             var bullet;
@@ -238,6 +249,8 @@ var game = function game() {
         delete keysDown[e.keyCode];
     }, false);
 
+
+    //Generic Response to collision. Moves the objects out of each others way by a certain amount.
     var respondToCollision = function (self, other, response) {
         if (self.solid && other.solid) {
             if (self.heavy) {
@@ -255,7 +268,11 @@ var game = function game() {
         }
     };
 
-    var addPlayer = function () {
+
+    //adds a new player to the game and overrides the current LocalPlayer if it is set.
+    var addPlayer = function (ID) {
+        // entities = getEntityList();
+        // playerList = getPlayerList();
         if (playerList[0] == undefined) {
             LocalPlayer = new Tank(100, 100, 1, 1);
             entities.push(LocalPlayer);
@@ -273,9 +290,12 @@ var game = function game() {
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
         }
-        console.log(playerList);
+        //  UpdateEntityList(entities);
+        // updatePlayerList(playerList);
     };
 
+
+    //Resets the player to the middle of the screen, function is outdated.
     var reset = function () {
         LocalPlayer.pos.x =
             canvas.width / 2;
@@ -283,6 +303,7 @@ var game = function game() {
     };
 
 
+    //Checks for collision a number of times equal to the loopCount.
     var Collision = function (loopCount) {
         for (var i = 0; i < loopCount; i++) {
             // Naively check for collision between all pairs of entities
@@ -329,6 +350,8 @@ var game = function game() {
 
         render();
     };
+
+    //Updates the location etc of the player every tick. Takes the deltatime to modify movement etc.
     var updatePlayer = function (modifier) {
         var speed = LocalPlayer.speed;
         var angle = LocalPlayer.polygon.angle;
@@ -355,6 +378,9 @@ var game = function game() {
         LocalPlayer.polygon._recalc();
     };
 
+
+    //updates the Bullets every tick. Checks if the bullet has to be deleted.
+    //Takes the delta time as a modifier for movement.
     var updateBullets = function (modifier) {
         LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
         for (var i = 0; i < entities.length; i++) {
@@ -414,7 +440,9 @@ var game = function game() {
        // playerList = getPlayerList();
         now = Date.now();
         delta = now - then;
-        updatePlayer(delta / 1000);
+        if (LocalPlayer != undefined) {
+            updatePlayer(delta / 1000);
+        }
         updateBullets(delta / 1000);
         update();
         Collision(5);
@@ -445,10 +473,4 @@ function GameStart() {
     game1.Start();
 }
 
-/* Aanmaken van een game
-var game1 = new game();
-game1.addWalls();
-game1.addPlayer();
-game1.addPlayer();
-game1.Start();
-*/
+//emit game1 naar server.
