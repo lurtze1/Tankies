@@ -274,19 +274,19 @@ var game = function game() {
         // entities = getEntityList();
         // playerList = getPlayerList();
         if (playerList[0] == undefined) {
-            LocalPlayer = new Tank(100, 100, 1, 1);
+            LocalPlayer = new Tank(100, 100, ID, 1);
             entities.push(LocalPlayer);
             playerList[0] = LocalPlayer;
         } else if (playerList[1] == undefined) {
-            LocalPlayer = new Tank(650, 650, 2, 2);
+            LocalPlayer = new Tank(650, 650, ID, 2);
             entities.push(LocalPlayer);
             playerList[1] = LocalPlayer;
         } else if (playerList[2] == undefined) {
-            LocalPlayer = new Tank(50, 650, 3, 3);
+            LocalPlayer = new Tank(50, 650, ID, 3);
             entities.push(LocalPlayer);
             playerList[2] = LocalPlayer;
         } else if (playerList[3] == undefined) {
-            LocalPlayer = new Tank(650, 50, 4, 4);
+            LocalPlayer = new Tank(650, 50, ID, 4);
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
         }
