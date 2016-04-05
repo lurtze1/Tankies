@@ -128,15 +128,15 @@ var game = function game() {
         //Indicates if this object cannot be moved
         this.heavy = false;
 
-        this.width = 60;
+        this.width = 10;
 
-        this.height = 30;
+        this.height = 10;
 
         //degrees in a turn in a second
         this.turnspeed = 180 * TO_RADIANS;
 
         //Polygon holds angle, position, size, offset.
-        this.polygon = P(V(x, y), [V(0, 0), V(60, 0), V(75, 15), V(60, 30), V(0, 30)]);
+        this.polygon = P(V(x, y), [V(0, 0), V(this.width, 0), V(this.width, this.height), V(0, this.height)]);
         this.angle = this.polygon.angle;
         this.polygon.translate(-this.width / 2, -this.height / 2);
 
