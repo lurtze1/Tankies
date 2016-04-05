@@ -382,7 +382,9 @@ var game = function game() {
     //updates the Bullets every tick. Checks if the bullet has to be deleted.
     //Takes the delta time as a modifier for movement.
     var updateBullets = function (modifier) {
-        LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
+        if (LocalPlayer != undefined) {
+            LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
+        }
         for (var i = 0; i < entities.length; i++) {
             var a = entities[i];
             if (a instanceof Bullet && !a.todelete) {
