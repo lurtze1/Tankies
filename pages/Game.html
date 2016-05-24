@@ -1,6 +1,39 @@
 <!DOCTYPE html>
+
+
+
+
+
+
+<button onclick="lobbyStart()">start lobby sessie</button>
+
+
+<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+    <b>ROOMS</b>
+    <div id="rooms"></div>
+    <input id="roomData" style="width:50px;"/>
+    <input type="button" onclick="addRoom('#roomData')" id="addRoom" value="Create room" />
+    <div id="localusers"></div>
+</div>
+<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+    <div id="conversation"></div>
+    <input id="data" style="width:200px;" />
+    <input type="button" id="datasend" onclick=sendMessage() value="send" />
+    <input type="button" onclick="clearchat()" id="clearchat" value="clearchat" />
+</div>
+
+
+
+
 <!--Button is for testing create game-->
-<button onclick="GameStart()">test</button>
+<div id="buttons">
+
+<button onclick="GameStart()">test game</button>
+
+<button onclick="GameStartLocal()">Start game</button>
+<button id="readyButton" onclick="readyUp()">Ready!</button>
+<button id="joinbutton" disabled="true" onclick="joinGame()">Join!</button>
 <div id="Game">
+</div>
 
 </div>

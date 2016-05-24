@@ -70,6 +70,8 @@ var game = function game() {
     var then = Date.now();
 
 /*//======commented voor connectie met server die nog niet werkt======
+ //======commented voor connectie met server die nog niet werkt======*/
+
     //functies voor updaten player & entity list
 
     function UpdateEntityList(entityList){
@@ -102,7 +104,7 @@ var game = function game() {
             //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
         }
     });
-    //======commented voor connectie met server die nog niet werkt======*/
+
 
     var Tank = function (x, y, playerID, team) {
         this.lifes = 3;
@@ -271,9 +273,20 @@ var game = function game() {
 
     //adds a new player to the game and overrides the current LocalPlayer if it is set.
     var addPlayer = function (ID) {
-        // entities = getEntityList();
-        // playerList = getPlayerList();
-        if (playerList[0] == undefined) {
+
+         getEntityList();
+         getPlayerList();
+
+
+        if (playerList === undefined) {
+            playerList = [];
+            console.log("playerlist defined...");
+        }
+        if (entities === undefined) {
+            entities = [];
+            console.log("entities defined...");
+        }
+        if (playerList[0] === undefined) {
             LocalPlayer = new Tank(100, 100, ID, 1);
             entities.push(LocalPlayer);
             playerList[0] = LocalPlayer;
@@ -290,8 +303,9 @@ var game = function game() {
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
         }
-        //  UpdateEntityList(entities);
-        // updatePlayerList(playerList);
+      console.log('addPlayer called.');
+          UpdateEntityList(entities);
+         updatePlayerList(playerList);
     };
 
 
@@ -438,8 +452,8 @@ var game = function game() {
 
     };
     var Start = function () {
-       // entities = getEntityList();
-       // playerList = getPlayerList();
+      getEntityList();
+      getPlayerList();
         now = Date.now();
         delta = now - then;
         if (LocalPlayer != undefined) {
@@ -451,9 +465,9 @@ var game = function game() {
 
         then = now;
 
-      //  UpdateEntityList(entities);
-       // updatePlayerList(playerList);
-        
+      UpdateEntityList(entities);
+      updatePlayerList(playerList);
+
         requestAnimationFrame(Start);
     };
 
