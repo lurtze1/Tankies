@@ -74,8 +74,8 @@ var game = function game() {
 
     //functies voor updaten player & entity list
 
-    function UpdateEntityList(entityList){
-        socket.emit('updateEntityList', entityList);
+    function UpdateEntityList(){
+        socket.emit('updateEntityList', entities);
     }
 
     function getEntityList(){
@@ -290,22 +290,22 @@ var game = function game() {
             LocalPlayer = new Tank(100, 100, ID, 1);
             entities.push(LocalPlayer);
             playerList[0] = LocalPlayer;
-        } else if (playerList[1] == undefined) {
+        } else if (playerList[1] === undefined) {
             LocalPlayer = new Tank(650, 650, ID, 2);
             entities.push(LocalPlayer);
             playerList[1] = LocalPlayer;
-        } else if (playerList[2] == undefined) {
+        } else if (playerList[2] === undefined) {
             LocalPlayer = new Tank(50, 650, ID, 3);
             entities.push(LocalPlayer);
             playerList[2] = LocalPlayer;
-        } else if (playerList[3] == undefined) {
+        } else if (playerList[3] === undefined) {
             LocalPlayer = new Tank(650, 50, ID, 4);
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
         }
       console.log('addPlayer called.');
-          UpdateEntityList(entities);
-         updatePlayerList(playerList);
+          UpdateEntityList();
+         updatePlayerList();
     };
 
 
@@ -452,8 +452,11 @@ var game = function game() {
 
     };
     var Start = function () {
+
       getEntityList();
       getPlayerList();
+
+      requestAnimationFrame(Start);
         now = Date.now();
         delta = now - then;
         if (LocalPlayer != undefined) {
@@ -465,10 +468,14 @@ var game = function game() {
 
         then = now;
 
-      UpdateEntityList(entities);
-      updatePlayerList(playerList);
 
-        requestAnimationFrame(Start);
+      updatePlayerList();
+      console.log("updatePlayerList " + JSON.stringify(playerList));
+
+      UpdateEntityList();
+      console.log("updateEntityList " + JSON.stringify(entities));
+      console.log("filler stuff");
+
     };
 
 

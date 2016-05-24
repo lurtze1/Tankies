@@ -260,29 +260,28 @@ io.sockets.on('connection', function (socket) {
 	});
 
 
-	socket.on('updateEntityList', function(entityList){
-		EntityList = entityList;
+	socket.on('updateEntityList', function(entities){
+		EntityList = entities;
 
 		//entity list gets globally saved on the server.
-		console.log('updateEntityList updated' + EntityList);
+		console.log('updateEntityList updated' + JSON.stringify(EntityList));
 
 	});
 
 	socket.on('getEntityList', function(){
 		if(EntityList.length > 0){
-			socket.emit('LatestUpdatedEntityList', EntityList);
-			console.log("EntityList called and updated");
-			//send back the current global variable of the entitylist.
-		}else{
-			//send error or send nothing at all?
 
-		}
+			socket.emit('LatestUpdatedEntityList', EntityList);
+			console.log(JSON.stringify(EntityList));
+			//send back the current global variable of the entitylist.
+	   }  
 console.log('getEntityList called.');
 	});
 
 	socket.on('getPlayerList', function(){
 		if (PlayerList.length > 0) {
 			socket.emit('LatestUpdatedPlayerList', PlayerList);
+      console.log(JSON.stringify(PlayerList));
 		}
 		//socket.emit('LatestUpdatedPlayerList', PlayerList);
 		console.log('getPlayerList called.');
@@ -290,15 +289,15 @@ console.log('getEntityList called.');
 
 
 	socket.on('updatePlayerList', function(playerList){
-		if(playerList.length <= 4) {
+	//	if(playerList.length <= 4) {
 			PlayerList = playerList;
-			console.log("Playerlist updated. : " + PlayerList);
+			console.log("Playerlist updated. : " + JSON.stringify(PlayerList));
 			socket.emit('updatedPlayerList', true);
 			//playerlist gets globally saved.
-		} else {
-			console.log("Playerlist not updated. : " + PlayerList);
-			socket.emit('updatedPlayerList', false);
-		}
+	//	} else {
+	//		console.log("Playerlist not updated. : " + PlayerList);
+	//		socket.emit('updatedPlayerList', false);
+		//}
 
 
 	});

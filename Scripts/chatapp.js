@@ -13,8 +13,8 @@ function lobbyStart(){
         // call the server-side function 'adduser' and send one parameter (value of prompt)
         socket.emit('adduser', prompt("What's your name?"));
     localGame = new game();
-    localGame.addWalls();
-  
+  //  localGame.addWalls();
+
 
     //localGame.Start();
     //});
