@@ -273,9 +273,6 @@ io.sockets.on('connection', function (socket) {
 			socket.emit('LatestUpdatedEntityList', EntityList);
 			console.log("EntityList called and updated");
 			//send back the current global variable of the entitylist.
-		}else{
-			//send error or send nothing at all?
-
 		}
 console.log('getEntityList called.');
 	});
