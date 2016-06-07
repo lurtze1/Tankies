@@ -24,7 +24,7 @@ function lobbyStart(){
 function GameStartLocal() {
 
 
-    localGame.Start();
+    localGame.Loop();
 }
 
 function joinGame(){
