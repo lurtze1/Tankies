@@ -1,7 +1,7 @@
 html,
 body {
     text-align: center;
-
+    background-color:grey;
 }
 
 @font-face {
@@ -140,4 +140,3 @@ h1 {
         font-size: 350%;
     }
 }
-

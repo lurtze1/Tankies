@@ -3,6 +3,8 @@
 //======commented voor connectie met server die nog niet werkt======
 
 // Contructor for Vector, made shorter for simplicity
+//var wait=require('wait.for');
+
 var V = function (x, y) {
     return new SAT.Vector(x, y);
 };
@@ -35,13 +37,14 @@ var game = function game() {
     canvas.width = 800;
     canvas.height = 800;
     document.getElementById("Game").appendChild(canvas);
-    var LocalPlayer;
     var entities = [];
     var LocalEntities = [];
     var walls = [];
     var playerList = [];
     var bgReady = false;
-
+    //player & ent list update booleans
+    var entUpd = false;
+    var plaUpd = false;
     //for images first you create an object, then you have to define an onload and then define a source.
     var bgImage = new Image(500, 500);
     bgImage.onload = function () {
@@ -74,6 +77,17 @@ var game = function game() {
      //======commented voor connectie met server die nog niet werkt======*/
 
     //functies voor updaten player & entity list
+    var deleteEnitity = function (entity) {
+
+    };
+
+    var addEntity = function (entity) {
+        socket.emit('addEntity', entity);
+    };
+
+    var updateEntity = function (entity) {
+        socket.emit('updateEntity', entity);
+    };
 
     function UpdateEntityList() {
         socket.emit('updateEntityList', entities);
@@ -82,7 +96,6 @@ var game = function game() {
     function getEntityList() {
         socket.emit('getEntityList');
     }
-
 
     function getPlayerList() {
         socket.emit('getPlayerList');
@@ -93,16 +106,33 @@ var game = function game() {
     }
 
     socket.on('addEntity', function (entity) {
+        var angle = entity.polygon.angle;
+        entity.polygon = P(V(entity.polygon.pos.x, entity.polygon.pos.y), entity.polygon.points);
+        entity.polygon.angle = angle;
         entities.push(entity);
         LocalEntities.push(entity);
     });
 
+    socket.on('updateEntity', function (entity) {
+        var angle = entity.polygon.angle;
+        entity.polygon = P(V(entity.polygon.pos.x, entity.polygon.pos.y), entity.polygon.points);
+        entity.polygon.angle = angle;
+        for (var i = 0; i < entities.length; i++) {
+            if (entities[i].ID == entity.ID) {
+                entities[i] = entity;
+                break;
+            }
+        }
+    });
+
     socket.on('LatestUpdatedEntityList', function (EntityList) {
         entities = EntityList;
+        entUpd = true;
     });
 
     socket.on('LatestUpdatedPlayerList', function (PlayerList) {
         playerList = PlayerList;
+        plaUpd = true;
     });
 
     socket.on('updatedPlayerList', function (bool) {
@@ -240,26 +270,17 @@ var game = function game() {
 
     //For the local player, checks if the player can fire and if he can fires the gun for the localplayer.
     var Fire = function () {
+        var LocalPlayer;
+        for (var i = 0; i < LocalEntities.length; i++) {
+            if (LocalEntities[i].istank && LocalEntities[i].ID !== undefined) {
+                LocalPlayer = LocalEntities[i];
+            }
+        }
         if (LocalPlayer.CurrentCooldown >= 60) {
             var bullet;
             bullet = new Bullet(LocalPlayer.team, LocalPlayer.polygon.angle, LocalPlayer.polygon.pos, LocalPlayer.playerID);
             addEntity(bullet);
             LocalPlayer.CurrentCooldown = 0;
-        }
-    };
-    var deleteEnitity = function (entity) {
-    };
-
-    var addEntity = function (entity) {
-        socket.emit('addEntity', entity);
-    };
-
-    var updateEntity = function (oldvalue, newvalue) {
-        var position = LocalEntities.indexOf(oldvalue);
-        var position2 = entities.indexOf(oldvalue);
-        if (position > -1 && position2 > -1) {
-            LocalPlayer[position] = newvalue;
-            entities[position2] = newvalue;
         }
     };
     addEventListener("keydown", function (e) {
@@ -292,45 +313,33 @@ var game = function game() {
 
     //adds a new player to the game and overrides the current LocalPlayer if it is set.
     var addPlayer = function (ID) {
-
-        getEntityList();
+        var LocalPlayer;
+        var players = 0;
+        for (var i = 0; i < entities.length; i++) {
+            if (entities[i].istank) {
+                players++
+            }
+        }
         if (playerList === undefined) {
             playerList = [];
-            console.log("playerlist defined...");
         }
         if (entities === undefined) {
             entities = [];
-            console.log("entities defined...");
         }
-        if (playerList[0] === undefined) {
+        if (players == 0) {
             LocalPlayer = new Tank(100, 100, ID, 1);
             addEntity(LocalPlayer);
-            playerList[0] = LocalPlayer;
-        } else if (playerList[1] == undefined) {
+        } else if (players == 1) {
             LocalPlayer = new Tank(650, 650, ID, 2);
-            entities.push(LocalPlayer);
-            playerList[1] = LocalPlayer;
-        } else if (playerList[2] == undefined) {
+            addEntity(LocalPlayer);
+        } else if (players == 2) {
             LocalPlayer = new Tank(50, 650, ID, 3);
-            entities.push(LocalPlayer);
-            playerList[2] = LocalPlayer;
-        } else if (playerList[3] == undefined) {
+            addEntity(LocalPlayer);
+        } else if (players == 3) {
             LocalPlayer = new Tank(650, 50, ID, 4);
-            entities.push(LocalPlayer);
-            playerList[3] = LocalPlayer;
+            addEntity(LocalPlayer);
         }
-        console.log('addPlayer called.');
-        UpdateEntityList();
     };
-
-
-    //Resets the player to the middle of the screen, function is outdated.
-    var reset = function () {
-        LocalPlayer.pos.x =
-            canvas.width / 2;
-        LocalPlayer.pos.y = canvas.height / 2;
-    };
-
 
     //Checks for collision a number of times equal to the loopCount.
     var Collision = function (loopCount) {
@@ -340,19 +349,19 @@ var game = function game() {
             var aCount = 0;
             for (aCount; aCount < LocalEntities.length; aCount++) {
                 var a = LocalEntities[aCount];
-                var bCount = aCount + 1;
+                var bCount = 0;
                 for (bCount; bCount < entities.length; bCount++) {
                     var b = entities[bCount];
                     var collided;
                     var aData = a.polygon;
                     var bData = b.polygon;
-                    if (a instanceof Tank && b instanceof Tank && a.playerID != b.playerID || b.istank && a.istank && a.playerID != b.playerID) {
+                    if (a.istank && b.istank && a.playerID != b.playerID || b.istank && a.istank && a.playerID != b.playerID) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a instanceof Tank && b instanceof Wall || b.istank && a instanceof Wall) {
+                    if (a.istank && b.iswall || b.istank && a.iswall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a instanceof Wall && b.isbullet || a.isbullet && b instanceof Wall) {
+                    if (a.iswall && b.isbullet || a.isbullet && b.iswall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                         if (collided) {
                             b.todelete = true;
@@ -367,7 +376,7 @@ var game = function game() {
                     }
 
                     if (collided) {
-                        if (a instanceof Tank && !b.isbullet || b.istank && !a.isbullet) {
+                        if (a.istank && !b.isbullet || b.istank && !a.isbullet) {
                             respondToCollision(a, b, This.response);
                         }
                     }
@@ -380,74 +389,64 @@ var game = function game() {
 
     //Updates the location etc of the player every tick. Takes the deltatime to modify movement etc.
     var updatePlayer = function (modifier) {
-        var oldLocalPlayer = LocalPlayer;
-        var speed = LocalPlayer.speed;
-        var angle = LocalPlayer.polygon.angle;
-        var velocity_x = speed * Math.cos(angle);
-        var velocity_y = -speed * Math.sin(angle);
-        if (65 in keysDown) { // Player holding left
-            angle -= LocalPlayer.turnspeed * modifier;
+        var LocalPlayer;
+        for (var i = 0; i < LocalEntities.length; i++) {
+            if (LocalEntities[i].istank && LocalEntities[i].ID !== undefined) {
+                LocalPlayer = LocalEntities[i];
+            }
         }
-        if (68 in keysDown) { // Player holding right
-            angle += LocalPlayer.turnspeed * modifier;
+        if (LocalPlayer != undefined) {
+            var speed = LocalPlayer.speed;
+            var angle = LocalPlayer.polygon.angle;
+            var velocity_x = speed * Math.cos(angle);
+            var velocity_y = -speed * Math.sin(angle);
+            if (65 in keysDown) { // Player holding left
+                angle -= LocalPlayer.turnspeed * modifier;
+            }
+            if (68 in keysDown) { // Player holding right
+                angle += LocalPlayer.turnspeed * modifier;
+            }
+            if (87 in keysDown) { // Player holding up
+                LocalPlayer.polygon.pos.x += velocity_x * modifier;
+                LocalPlayer.polygon.pos.y -= velocity_y * modifier;
+            }
+            if (83 in keysDown) { // Player holding down
+                LocalPlayer.polygon.pos.x -= velocity_x * modifier;
+                LocalPlayer.polygon.pos.y += velocity_y * modifier;
+            }
+            if (32 in keysDown) {
+                Fire();
+            }
+            LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
+            LocalPlayer.polygon.angle = angle;
+            LocalPlayer.polygon._recalc();
+            updateEntity(LocalPlayer);
         }
-        if (87 in keysDown) { // Player holding up
-            LocalPlayer.polygon.pos.x += velocity_x * modifier;
-            LocalPlayer.polygon.pos.y -= velocity_y * modifier;
-        }
-        if (83 in keysDown) { // Player holding down
-            LocalPlayer.polygon.pos.x -= velocity_x * modifier;
-            LocalPlayer.polygon.pos.y += velocity_y * modifier;
-        }
-        if (32 in keysDown) {
-            Fire();
-        }
-        LocalPlayer.polygon.angle = angle;
-        LocalPlayer.polygon._recalc();
-        updateEntity(oldLocalPlayer, LocalPlayer);
     };
 
 
     //updates the Bullets every tick. Checks if the bullet has to be deleted.
     //Takes the delta time as a modifier for movement.
     var updateBullets = function (modifier) {
-        if (LocalPlayer != undefined) {
-            LocalPlayer.CurrentCooldown += LocalPlayer.Cooldown * modifier;
-        }
         for (var i = 0; i < LocalEntities.length; i++) {
-            var olda = LocalEntities[i];
             var a = LocalEntities[i];
-            if (a instanceof Bullet && !a.todelete) {
+            if (a.isbullet) {
                 var angle = a.polygon.angle;
                 var velocity_x = a.speed * Math.cos(angle);
                 var velocity_y = -(a.speed) * Math.sin(angle);
                 a.polygon.pos.x += velocity_x * modifier;
                 a.polygon.pos.y -= velocity_y * modifier;
-                updateEntity(olda, a)
-            }
-            if (a.todelete) {
-                LocalEntities.splice(i, 1);
+                a.polygon._recalc();
+                updateEntity(a)
             }
         }
     };
 
-    var update = function () {
-        for (var i = 0; i < LocalEntities.length; i++) {
-            var a = LocalEntities[i];
-            if (a.ishit) {
-                a.ishit = false;
-                a.lifes -= 1;
-                if (a.lifes < 1) {
-                    LocalEntities.splice(i, 1);
-                }
-            }
-        }
-
-    };
     var render = function () {
         /*if (bgReady) {
          ctx.drawImage(bgImage, 0, 0);
          }*/
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var ii = 0; ii < entities.length; ii++) {
             PaintEntity(ctx, entities[ii]);
         }
@@ -455,26 +454,20 @@ var game = function game() {
     var addWalls = function () {
         var wall;
         wall = new Wall(0, 0, 800, 20);
-        walls.push(wall);
-        entities.push(wall);
+        addEntity(wall);
         wall = new Wall(0, 780, 800, 20);
-        walls.push(wall);
-        entities.push(wall);
+        addEntity(wall);
         wall = new Wall(780, 0, 20, 800);
-        walls.push(wall);
-        entities.push(wall);
+        addEntity(wall);
         wall = new Wall(0, 20, 20, 780);
-        walls.push(wall);
-        entities.push(wall);
-
+        addEntity(wall);
 
     };
     var Loop = function () {
         now = Date.now();
+        //getEntityList();
         delta = now - then;
-        if (LocalPlayer != undefined) {
-            updatePlayer(delta / 1000);
-        }
+        updatePlayer(delta / 1000);
         updateBullets(delta / 1000);
         update();
         Collision(1);
@@ -482,7 +475,6 @@ var game = function game() {
         then = now;
         requestAnimationFrame(Loop);
     };
-
 
     return {
         Loop: Loop,
@@ -492,12 +484,5 @@ var game = function game() {
     }
 
 };
-function GameStart() {
-    var game1 = new game();
-    game1.addWalls();
-    game1.addPlayer();
-    game1.addPlayer();
-    game1.Loop();
-}
 
 //emit game1 naar server.
