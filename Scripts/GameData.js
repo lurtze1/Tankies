@@ -77,6 +77,8 @@ var game = function game() {
      //======commented voor connectie met server die nog niet werkt======*/
 
     //functies voor updaten player & entity list
+    
+    
     var removeEntity = function (entity) {
         socket.emit('removeEntity', entity);
     };
@@ -135,17 +137,11 @@ var game = function game() {
 
     socket.on('LatestUpdatedEntityList', function (EntityList) {
         entities = EntityList;
-        entUpd = true;
-    });
-
-    socket.on('LatestUpdatedPlayerList', function (PlayerList) {
-        playerList = PlayerList;
-        plaUpd = true;
-    });
-
-    socket.on('updatedPlayerList', function (bool) {
-        if (!bool) {
-            //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
+        for (var i = 0; i < entities.length; i++) {
+            var entity = entities[i];
+            var angle = entities[i].angle;
+            entities[i].polygon = P(V(entity.polygon.pos.x, entity.polygon.pos.y), entity.polygon.points);
+            entities[i].polygon.angle = angle;
         }
     });
 
@@ -326,12 +322,6 @@ var game = function game() {
                 players++
             }
         }
-        if (playerList === undefined) {
-            playerList = [];
-        }
-        if (entities === undefined) {
-            entities = [];
-        }
         if (players == 0) {
             LocalPlayer = new Tank(100, 100, ID, 1);
             addEntity(LocalPlayer);
@@ -474,7 +464,6 @@ var game = function game() {
     };
     var Loop = function () {
         now = Date.now();
-        //getEntityList();
         delta = now - then;
         updatePlayer(delta / 1000);
         updateBullets(delta / 1000);
@@ -488,7 +477,8 @@ var game = function game() {
         Loop: Loop,
         addPlayer: addPlayer,
         addWalls: addWalls,
-        render: render
+        render: render,
+        getEntityList: getEntityList
     }
 
 };

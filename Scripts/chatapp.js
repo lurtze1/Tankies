@@ -10,18 +10,16 @@ function lobbyStart() {
     //socket.on('connect', function(){
     // call the server-side function 'adduser' and send one parameter (value of prompt)
     socket.emit('adduser', prompt("What's your name?"));
-    localGame = new game();
-    localGame.addWalls();
+
 
 
 }
 
 function GameStartLocal() {
-    localGame.Loop();
+
 }
 
 function joinGame() {
-    localGame.addPlayer(ID);
     document.getElementById('joinbutton').disabled = 'disabled';
 }
 

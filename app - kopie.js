@@ -256,37 +256,37 @@ io.sockets.on('connection', function (socket) {
     });
 
     var ID = 0;
-  var entities = [];
+    var entities = [];
 
-  function getIndexEntities(entity){
-    var index;
-    for (var i = 0; i < entities.length; i++){
-      if(entities[i].ID == entity.ID){
-        index = i;
-        break;
-      }
-      index = -1;
+    function getIndexEntities(entity) {
+        var index;
+        for (var i = 0; i < entities.length; i++) {
+            if (entities[i].ID == entity.ID) {
+                index = i;
+                break;
+            }
+            index = -1;
+        }
+        return index;
     }
-    return index;
-  }
 
     socket.on('updateEntity', function (entity) {
-      var index = getIndexEntities(entity);
-      entities[index] = entity;
-      io.sockets.in(socket.room).emit('updateEntity', entity);
+        var index = getIndexEntities(entity);
+        entities[index] = entity;
+        io.sockets.in(socket.room).emit('updateEntity', entity);
     });
     socket.on('removeEntity', function (entity) {
-    var index = getIndexEntities(entity);
-    if (index > -1){
-      entities.splice(index, 1);
-    }
+        var index = getIndexEntities(entity);
+        if (index > -1) {
+            entities.splice(index, 1);
+        }
 
-      io.sockets.in(socket.room).emit('removeEntity', entity);
+        io.sockets.in(socket.room).emit('removeEntity', entity);
     });
     socket.on('addEntity', function (entity) {
         entity.ID = ID;
-      entities.push(entity);
-      io.sockets.in(socket.room).emit('addEntity', entity);
+        entities.push(entity);
+        io.sockets.in(socket.room).emit('addEntity', entity);
         ID++;
     });
 
@@ -299,12 +299,8 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('getEntityList', function () {
-        if (EntityList.length > 0) {
-
-            socket.emit('LatestUpdatedEntityList', EntityList);
-            console.log(JSON.stringify(EntityList));
-            //send back the current global variable of the entitylist.
-
+        if (entities.length > 0) {
+            socket.emit('LatestUpdatedEntityList', entities);
         }
 
         console.log('getEntityList called.');
