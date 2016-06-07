@@ -77,8 +77,8 @@ var game = function game() {
      //======commented voor connectie met server die nog niet werkt======*/
 
     //functies voor updaten player & entity list
-    var deleteEnitity = function (entity) {
-
+    var removeEntity = function (entity) {
+        socket.emit('removeEntity', entity);
     };
 
     var addEntity = function (entity) {
@@ -121,6 +121,14 @@ var game = function game() {
             if (entities[i].ID == entity.ID) {
                 entities[i] = entity;
                 break;
+            }
+        }
+    });
+
+    socket.on('removeEntity', function (entity) {
+        for (var i = 0; i < entities.length; i++) {
+            if (entities[i].ID == entity.ID) {
+                entities.splice(i, 1);
             }
         }
     });
@@ -256,13 +264,11 @@ var game = function game() {
         this.height = 10;
         this.solid = true;
         this.isbullet = true;
-        //noinspection JSDuplicatedDeclaration
         this.angle = angle;
         this.polygon = new P(V(pos.x, pos.y), [V(0, 0), V(this.width, 0), V(this.width, this.height), V(0, this.height)]);
         this.team = team;
         this.speed = 60;
         this.polygon.angle = angle;
-        this.todelete = false;
         this.polygon.translate(-this.width / 2, -this.height / 2);
         this.polygon._recalc();
     }
@@ -355,28 +361,31 @@ var game = function game() {
                     var collided;
                     var aData = a.polygon;
                     var bData = b.polygon;
-                    if (a.istank && b.istank && a.playerID != b.playerID || b.istank && a.istank && a.playerID != b.playerID) {
+                    if (a.istank && b.istank && a.playerID != b.playerID) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a.istank && b.iswall || b.istank && a.iswall) {
+                    if (a.istank && b.iswall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
-                    if (a.iswall && b.isbullet || a.isbullet && b.iswall) {
+                    if (a.isbullet && b.iswall) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                         if (collided) {
-                            b.todelete = true;
+                            removeEntity(a);
                         }
                     }
-                    if (a.istank && b.isbullet && a.team != b.team || b.istank && a.isbullet && a.team != b.team) {
+                    if (a.istank && b.isbullet && a.team != b.team) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                         if (collided) {
-                            b.todelete = true;
-                            a.ishit = true;
+                            a.lifes -= 1;
+                            removeEntity(b);
+                            if (a.lifes >= 0) {
+                                removeEntity(a);
+                            }
                         }
                     }
 
                     if (collided) {
-                        if (a.istank && !b.isbullet || b.istank && !a.isbullet) {
+                        if (a.istank && !b.isbullet) {
                             respondToCollision(a, b, This.response);
                         }
                     }
@@ -469,7 +478,6 @@ var game = function game() {
         delta = now - then;
         updatePlayer(delta / 1000);
         updateBullets(delta / 1000);
-        update();
         Collision(1);
         render();
         then = now;
