@@ -260,17 +260,38 @@ io.sockets.on('connection', function (socket) {
 	});
 
   var ID = 0;
+  var entities = [];
+
+  function getIndexEntities(entity){
+    var index;
+    for (var i = 0; i < entities.length; i++){
+      if(entities[i].ID == entity.ID){
+        index = i;
+        break;
+      }
+      index = -1;
+    }
+    return index;
+  }
 
   socket.on('updateEntity',function(entity){
-      socket.broadcast.emit('updateEntity', entity);
+      var index = getIndexEntities(entity);
+      entities[index] = entity;
+      io.sockets.in(socket.room).emit('updateEntity', entity);
   });
   socket.on('removeEntity', function(entity){
-      socket.broadcast.emit('removeEntity', entity);
+    var index = getIndexEntities(entity);
+    if (index > -1){
+      entities.splice(index, 1);
+    }
+
+      io.sockets.in(socket.room).emit('removeEntity', entity);
   });
   socket.on('addEntity', function(entity){
       entity.ID = ID;
+      entities.push(entity);
+      io.sockets.in(socket.room).emit('addEntity', entity);
       ID++;
-      socket.broadcast.emit('addEntity', entity);
   });
 
 	socket.on('updateEntityList', function(entities){
