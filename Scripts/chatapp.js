@@ -63,12 +63,21 @@ socket.on('updatechat', function (username, data) {
     $('#conversation').append('<p class="whiteletters"><b>'+username + ':</b> ' + data + '</p><br>');
 });
 
-socket.on('updateUsers', function(userList){
+/*socket.on('updateUsers', function(userList){
     $('#localusers').empty();
     userList.forEach(function(value){
 
         $('#localusers').append('<div><p class="whiteletters">' + value + '</p></div>');
     });
+});*/
+
+socket.on('updateUsers', function(userList){
+  $('#localusers').empty();
+  userList.forEach(function(value){
+    $('#localusers').append('<div><p class="whiteletters">' + value.name + '</p></div>');
+    
+  });
+
 });
 
 // listener, whenever the server emits 'updaterooms', this updates the room the client is in

@@ -114,6 +114,7 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' has connected to this room');
 		socket.emit('updaterooms', rooms, 'room1');
 		io.sockets.in(socket.room).emit('updateUsers', roomsTest[0].users );
+    console.log(roomsTest[0].users.toString());
 
 		//some testing stuff
 

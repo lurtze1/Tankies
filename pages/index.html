@@ -24,9 +24,10 @@
 	socket.on('updateUsers', function(userList){
 		$('#localusers').empty();
 		userList.forEach(function(value){
-
-			$('#localusers').append('<div>' + value + '</div>');
+			console.log(value.toString());
+			$('#localusers').append('<div>' + value + ' TEST' + '</div>');
 		});
+
 	});
 
 	// listener, whenever the server emits 'updaterooms', this updates the room the client is in
@@ -99,4 +100,3 @@
 	<input type="button" id="datasend" value="send" />
 	<input type="button" onclick="clearchat()" id="clearchat" value="clearchat" />
 </div>
-
