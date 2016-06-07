@@ -3,6 +3,8 @@
 //======commented voor connectie met server die nog niet werkt======
 
 // Contructor for Vector, made shorter for simplicity
+//var wait=require('wait.for');
+
 var V = function (x, y) {
     return new SAT.Vector(x, y);
 };
@@ -40,7 +42,9 @@ var game = function game() {
     var playerList = [];
     var bulletList = [];
     var bgReady = false;
-
+    //player & ent list update booleans
+    var entUpd = false;
+    var plaUpd = false;
     //for images first you create an object, then you have to define an onload and then define a source.
     var bgImage = new Image(500, 500);
     bgImage.onload = function () {
@@ -67,40 +71,62 @@ var game = function game() {
     var keysDown = {};
     var now;
     var delta;
-    var then = Date.now();
+    var then = 0;
 
-/*//======commented voor connectie met server die nog niet werkt======
- //======commented voor connectie met server die nog niet werkt======*/
+    /*//======commented voor connectie met server die nog niet werkt======
+     //======commented voor connectie met server die nog niet werkt======*/
 
     //functies voor updaten player & entity list
 
-    function UpdateEntityList(){
+    function UpdateEntityList() {
         socket.emit('updateEntityList', entities);
     }
 
-    function getEntityList(){
+    function getEntityList() {
         socket.emit('getEntityList');
     }
 
+    function getPlayerListT(onDone){
+      console.log("testTESTtest");
+      socket.emit('getPlayerList');
+    socket.on('LatestUpdatedPlayerList', function(PlayerList, callback) {
+        playerList = PlayerList;
+        var a = onDone(playerList);
+        console.log(a + "##############################################");
+        return playerList;
+    });
+  }
 
-    function getPlayerList(){
+  function getEntityListT(onDone){
+    console.log("testTESTtest");
+    socket.emit('getEntityList');
+  socket.on('LatestUpdatedEntityList', function(EntityList, callback) {
+      entities = EntityList;
+      var a = onDone(entities);
+      console.log(a + "##############################################");
+      return entities;
+  });
+}
+    function getPlayerList() {
         socket.emit('getPlayerList');
     }
 
-    function updatePlayerList(){
+    function updatePlayerList() {
         socket.emit('updatePlayerList', playerList);
     }
 
-    socket.on('LatestUpdatedEntityList', function(entityList){
-       entities = entityList;
+    socket.on('LatestUpdatedEntityList', function (EntityList) {
+        entities = EntityList;
+        entUpd = true;
     });
 
-    socket.on('LatestUpdatedPlayerList', function(PlayerList){
+    socket.on('LatestUpdatedPlayerList', function (PlayerList) {
         playerList = PlayerList;
+        plaUpd = true;
     });
 
-    socket.on('updatedPlayerList', function(bool){
-        if(!bool){
+    socket.on('updatedPlayerList', function (bool) {
+        if (!bool) {
             //mogelijke iets doen als er false terugkomt, laat het voorlopig even leeg.
         }
     });
@@ -163,22 +189,22 @@ var game = function game() {
             context.lineTo(entitypoint[i].x, entitypoint[i].y);
         }
         context.closePath();
-        if (Entity instanceof Tank) {
+        if (Entity.istank == true) {
 
             //for youri how to do image
             /*if(TankReady){
-                var pattern = ctx.createPattern(TankImage,"repeat");
-                context.fillStyle = pattern;
-            }else{*/
-                context.fillStyle = "#4CD64C";
+             var pattern = ctx.createPattern(TankImage,"repeat");
+             context.fillStyle = pattern;
+             }else{*/
+            context.fillStyle = "#4CD64C";
             //}
 
 
         }
-        if (Entity instanceof Bullet) {
+        if (Entity.isbullet == true) {
             context.fillStyle = "#D64C4C";
         }
-        if (Entity instanceof Wall) {
+        if (Entity.iswall == true) {
             context.fillStyle = "#4C4CD6";
         }
         context.fill();
@@ -274,10 +300,7 @@ var game = function game() {
     //adds a new player to the game and overrides the current LocalPlayer if it is set.
     var addPlayer = function (ID) {
 
-         getEntityList();
-         getPlayerList();
-
-
+        getEntityList();
         if (playerList === undefined) {
             playerList = [];
             console.log("playerlist defined...");
@@ -303,9 +326,11 @@ var game = function game() {
             entities.push(LocalPlayer);
             playerList[3] = LocalPlayer;
         }
+
       console.log('addPlayer called.');
           UpdateEntityList();
          updatePlayerList();
+
     };
 
 
@@ -331,7 +356,7 @@ var game = function game() {
                     var collided;
                     var aData = a.polygon;
                     var bData = b.polygon;
-                    if (a instanceof Tank && b instanceof Tank && a.playerID != b.playerID|| b.istank && a.istank && a.playerID != b.playerID) {
+                    if (a instanceof Tank && b instanceof Tank && a.playerID != b.playerID || b.istank && a.istank && a.playerID != b.playerID) {
                         collided = SAT.testPolygonPolygon(aData, bData, This.response);
                     }
                     if (a instanceof Tank && b instanceof Wall || b.istank && a instanceof Wall) {
@@ -361,8 +386,6 @@ var game = function game() {
 
             }
         }
-
-        render();
     };
 
     //Updates the location etc of the player every tick. Takes the deltatime to modify movement etc.
@@ -426,11 +449,12 @@ var game = function game() {
                 }
             }
         }
+
     };
     var render = function () {
-        if (bgReady) {
-            ctx.drawImage(bgImage, 0, 0);
-        }
+        /*if (bgReady) {
+         ctx.drawImage(bgImage, 0, 0);
+         }*/
         for (var ii = 0; ii < entities.length; ii++) {
             PaintEntity(ctx, entities[ii]);
         }
@@ -450,23 +474,39 @@ var game = function game() {
         walls.push(wall);
         entities.push(wall);
 
+
     };
     var Start = function () {
 
-      getEntityList();
-      getPlayerList();
 
-      requestAnimationFrame(Start);
+      //entities = getEntityListT(function(){ return entities; });
+      //getPlayerListT(function(){ return true;});
+      //getEntityListT(function(){ return true;});
+      //console.log(Pl.toString() + El.toString());
+      getPlayerList();
+      getEntityList();
+      while (!plaUpd || !entUpd) {
+        setTimeout(requestAnimationFrame(Start), 100);
+      }
+      if (plaUpd && entUpd){
+        requestAnimationFrame(start);
+      }
+      //requestAnimationFrame(Start);
+
+
         now = Date.now();
+        //getEntityList();
         delta = now - then;
         if (LocalPlayer != undefined) {
             updatePlayer(delta / 1000);
         }
         updateBullets(delta / 1000);
         update();
-        Collision(5);
-
+        Collision(1);
+        render();
+        //UpdateEntityList();
         then = now;
+
 
 
       updatePlayerList();
@@ -476,11 +516,13 @@ var game = function game() {
       console.log("updateEntityList " + JSON.stringify(entities));
       console.log("filler stuff");
 
+
+        //requestAnimationFrame(Start);
+
     };
 
 
-
-    return{
+    return {
         Start: Start,
         addPlayer: addPlayer,
         addWalls: addWalls,

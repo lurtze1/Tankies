@@ -259,6 +259,19 @@ io.sockets.on('connection', function (socket) {
 		socket.leave(socket.room);
 	});
 
+  var ID = 0;
+
+  socket.on('updateEntity',function(entity){
+      socket.broadcast.emit('updateEntity', entity);
+  });
+  socket.on('removeEntity', function(entity){
+      socket.broadcast.emit('removeEntity', entity);
+  });
+  socket.on('addEntity', function(entity){
+      entity.ID = ID;
+      ID++;
+      socket.broadcast.emit('addEntity', entity);
+  });
 
 	socket.on('updateEntityList', function(entities){
 		EntityList = entities;
@@ -274,7 +287,9 @@ io.sockets.on('connection', function (socket) {
 			socket.emit('LatestUpdatedEntityList', EntityList);
 			console.log(JSON.stringify(EntityList));
 			//send back the current global variable of the entitylist.
-	   }  
+
+		}
+
 console.log('getEntityList called.');
 	});
 
