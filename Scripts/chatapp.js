@@ -3,16 +3,19 @@ var currentRoom = "";
 var localGame;
 var ID;
 var ready = false;
+var name = "";
 
 
 
 
 // on connection to server, ask for user's name with an anonymous callback
 function lobbyStart(){
+  name = prompt("What's your name?");
     //socket.on('connect', function(){
         // call the server-side function 'adduser' and send one parameter (value of prompt)
-        socket.emit('adduser', prompt("What's your name?"));
-    localGame = new game();
+        socket.emit('adduser', name);
+        console.log('My username is: ' + name);
+  //  localGame = new game();
   //  localGame.addWalls();
 
 
@@ -21,6 +24,22 @@ function lobbyStart(){
 
 }
 
+//functies om game the initialiseren...
+socket.on('createGameObject', function(){
+  localGame = new game();
+  console.log('Game created.');
+})
+socket.on('createWalls', function(){
+  localGame.addWalls();
+
+});
+socket.on('addPlayer', function(){
+  localGame.addPlayer();
+  socket.emit('playerAdded', true);
+});
+socket.on('startGame', function(){
+  localGame.Loop();
+});
 function GameStartLocal() {
 
 
@@ -75,7 +94,6 @@ socket.on('updateUsers', function(userList){
   $('#localusers').empty();
   userList.forEach(function(value){
     $('#localusers').append('<div><p class="whiteletters">' + value.name + '</p></div>');
-    
   });
 
 });
@@ -96,6 +114,16 @@ socket.on('updaterooms', function(rooms, current_room) {
     });
 });
 
+socket.on('playerThatNeedsToJoin', function(list){
+  if(name == list[0].name){
+  console.log('playerThatNeedsToJoin called!');
+  localGame.addWalls();
+  localGame.addPlayer(list[0].ID);
+  console.log(list[0].ID + ' added.');
+  list.splice(0, 1);
+  socket.emit('returnArrayPlayersThatNeedToJoin', list);
+  }
+})
 
 
 function switchRoom(room){
