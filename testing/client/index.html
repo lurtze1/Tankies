@@ -2,56 +2,135 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-    var ctx = document.getElementById("ctx").getContext("2d");
-    ctx.font = '30px Arial';
+	var ctx = document.getElementById("ctx").getContext("2d");
+	ctx.font = '30px Arial';
 
-    var socket = io();
+	var socket = io();
 
-    socket.on('newPositions',function(data){
-        ctx.clearRect(0,0,500,500);
-        for(var i = 0 ; i < data.player.length; i++)
-            ctx.fillText(data.player[i].number,data.player[i].x,data.player[i].y);
+	socket.on('newPositions', function(data) {
+		ctx.clearRect(0, 0, 500, 500);
+		for (var i = 0; i < data.player.length; i++) {
+			ctx.save();
+			ctx.translate(data.player[i].polygon.pos.x, data.player[i].polygon.pos.y);
+			// rotate around this point
+			ctx.rotate(-data.player[i].polygon.angle);
+			ctx.beginPath();
+			var entitypoint = data.player[i].polygon.points;
+			ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
+			for (var i = 1; i < entitypoint.length; i++) {
+				ctx.lineTo(entitypoint[i].x, entitypoint[i].y);
+			}
+			ctx.closePath();
+			ctx.fillStyle = "#4CD64C";
 
-        for(i = 0 ; i < data.bullet.length; i++)
-            ctx.fillRect(data.bullet[i].x-5,data.bullet[i].y-5,10,10);
-    });
+			ctx.fill();
+			ctx.stroke();
 
-    document.onkeydown = function(event){
-        if(event.keyCode === 68)    //d
-            socket.emit('keyPress',{inputId:'right',state:true});
-        else if(event.keyCode === 83)   //s
-            socket.emit('keyPress',{inputId:'down',state:true});
-        else if(event.keyCode === 65) //a
-            socket.emit('keyPress',{inputId:'left',state:true});
-        else if(event.keyCode === 87) // w
-            socket.emit('keyPress',{inputId:'up',state:true});
+			ctx.clip();
 
-    }
-    document.onkeyup = function(event){
-        if(event.keyCode === 68)    //d
-            socket.emit('keyPress',{inputId:'right',state:false});
-        else if(event.keyCode === 83)   //s
-            socket.emit('keyPress',{inputId:'down',state:false});
-        else if(event.keyCode === 65) //a
-            socket.emit('keyPress',{inputId:'left',state:false});
-        else if(event.keyCode === 87) // w
-            socket.emit('keyPress',{inputId:'up',state:false});
-    }
+			ctx.restore();
+		}
+		for (var i = 0; i < data.wall.length; i++) {
+			ctx.save();
+			ctx.translate(data.wall[i].polygon.pos.x, data.wall[i].polygon.pos.y);
+			// rotate around this point
+			ctx.rotate(-data.wall[i].polygon.angle);
+			ctx.beginPath();
+			entitypoint = data.wall[i].polygon.points;
+			ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
+			for (var ii = 1; ii < entitypoint.length; ii++) {
+				ctx.lineTo(entitypoint[ii].x, entitypoint[ii].y);
+			}
+			ctx.closePath();
+			ctx.fillStyle = "#4CD64C";
 
-    document.onmousedown = function(event){
-        socket.emit('keyPress',{inputId:'attack',state:true});
-    }
-    document.onmouseup = function(event){
-        socket.emit('keyPress',{inputId:'attack',state:false});
-    }
-    document.onmousemove = function(event){
-        var x = -250 + event.clientX - 8;
-        var y = -250 + event.clientY - 8;
-        var angle = Math.atan2(y,x) / Math.PI * 180;
-        socket.emit('keyPress',{inputId:'mouseAngle',state:angle});
-    }
+			ctx.fill();
+			ctx.stroke();
 
+			ctx.clip();
 
+			ctx.restore();
+		}
+		for (i = 0; i < data.bullet.length; i++) {
+			ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
+		}
+	});
+
+	document.onkeydown = function(event) {
+		if (event.keyCode === 68)    //d
+		{
+			socket.emit('keyPress', {
+				inputId: 'right',
+				state: true
+			});
+		}
+		else if (event.keyCode === 83)   //s
+		{
+			socket.emit('keyPress', {
+				inputId: 'down',
+				state: true
+			});
+		}
+		else if (event.keyCode === 65) //a
+		{
+			socket.emit('keyPress', {
+				inputId: 'left',
+				state: true
+			});
+		}
+		else if (event.keyCode === 87) // w
+		{
+			socket.emit('keyPress', {
+				inputId: 'up',
+				state: true
+			});
+		}
+
+	};
+	document.onkeyup = function(event) {
+		if (event.keyCode === 68)    //d
+			socket.emit('keyPress', {
+				inputId: 'right',
+				state: false
+			});
+		else if (event.keyCode === 83)   //s
+			socket.emit('keyPress', {
+				inputId: 'down',
+				state: false
+			});
+		else if (event.keyCode === 65) //a
+			socket.emit('keyPress', {
+				inputId: 'left',
+				state: false
+			});
+		else if (event.keyCode === 87) // w
+			socket.emit('keyPress', {
+				inputId: 'up',
+				state: false
+			});
+	}
+
+	document.onmousedown = function(event) {
+		socket.emit('keyPress', {
+			inputId: 'attack',
+			state: true
+		});
+	}
+	document.onmouseup = function(event) {
+		socket.emit('keyPress', {
+			inputId: 'attack',
+			state: false
+		});
+	}
+	document.onmousemove = function(event) {
+		var x = -250 + event.clientX - 8;
+		var y = -250 + event.clientY - 8;
+		var angle = Math.atan2(y, x) / Math.PI * 180;
+		socket.emit('keyPress', {
+			inputId: 'mouseAngle',
+			state: angle
+		});
+	}
 
 
 </script>

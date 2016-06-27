@@ -68,9 +68,13 @@ var Player = function(x, y, playerID, team) {
 	self.Cooldown = 60;
 	self.CurrentCooldown = 60;
 	self.speed = 10;
+	self.width = 20;
+	self.height = 20;
 	self.istank = true;
 	self.turnspeed = 180 * TO_RADIANS;
-	self.polygon = P(V(x, y), [V(0, 0), V(self.width, 0), V(self.width, self.height), V(0, self.height)]);
+	self.polygon = P(V(x, y), [
+		V(0, 0), V(self.width, 0), V(self.width + 10, self.height / 2), V(self.width, self.height), V(0, self.height)
+	]);
 	self.polygon.translate(-self.width / 2, -self.height / 2);
 
 	var super_update = self.update;
@@ -81,6 +85,8 @@ var Player = function(x, y, playerID, team) {
 		if (self.pressingAttack) {
 			self.shootBullet(self.mouseAngle);
 		}
+		Collision(self, Bullet.list);
+		Collision(self, Wall.list);
 	}
 	self.shootBullet = function(angle) {
 		var b = Bullet(self.playerID, angle, self.polygon.pos.x, self.polygon.pos.y, self.team, self.playerID);
@@ -88,10 +94,10 @@ var Player = function(x, y, playerID, team) {
 
 	self.updateSpd = function() {
 		if (self.pressingRight) {
-			self.polygon.angle += 10*TO_RADIANS;
+			self.polygon.angle += 10 * TO_RADIANS;
 		}
 		else if (self.pressingLeft) {
-			self.polygon.angle -= 10*TO_RADIANS;
+			self.polygon.angle -= 10 * TO_RADIANS;
 		}
 		else {
 			self.polygon.angle += 0;
@@ -147,8 +153,7 @@ Player.update = function() {
 		var player = Player.list[i];
 		player.update();
 		pack.push({
-			x: player.polygon.pos.x,
-			y: player.polygon.pos.y,
+			polygon: player.polygon,
 			number: player.number
 		});
 	}
@@ -156,16 +161,39 @@ Player.update = function() {
 }
 
 var Wall = function(x, y, length, width) {
+	console.log(x + ' ' + y);
 	var self = Entity();
+	self.id = Math.random();
 	self.solid = true;
 	self.heavy = true;
 	self.width = width;
 	self.height = length;
 	self.iswall = true;
 	self.polygon = P(V(x, y), [V(0, 0), V(length, 0), V(length, width), V(0, width)]);
+	self.polygon._recalc();
+	console.log(self.polygon.pos.x);
+	console.log(self.polygon.pos.y);
+	Wall.list[self.id] = self;
+	return self;
 
 };
 Wall.list = {};
+Wall.update = function() {
+	var pack = [];
+	for (var i in Wall.list) {
+		var wall = Wall.list[i];
+
+		pack.push({
+			polygon: wall.polygon,
+		});
+
+	}
+	return pack;
+};
+Wall(0, 0, 500, 20);
+Wall(0, 480, 500, 20);
+Wall(480, 0, 20, 500);
+Wall(0, 20, 20, 480);
 
 function Bullet(parent, angle, x, y, team, playerID) {
 	var self = Entity();
@@ -189,15 +217,7 @@ function Bullet(parent, angle, x, y, team, playerID) {
 			self.toRemove = true;
 		}
 		super_update();
-
-		for (var i in Player.list) {
-			var p = Player.list[i];
-			if (self.getDistance(p) < 32 && self.parent !== p.playerID) {
-				//handle collision. ex: hp--;
-				self.toRemove = true;
-			}
-		}
-	}
+	};
 	Bullet.list[self.id] = self;
 	return self;
 }
@@ -237,10 +257,59 @@ io.sockets.on('connection', function(socket) {
 
 });
 
+function Collision(me, entities) {
+	var response = new SAT.Response();
+	// Naively check for collision between all pairs of entities
+	// E.g if there are 4 entities: (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
+	for (var aCount = 0; aCount < entities.length; aCount++) {
+		var b = entities[aCount];
+		var collided;
+		var aData = me.polygon;
+		var bData = b.polygon;
+		if (me.istank && b.istank && me.playerID != b.playerID) {
+			collided = SAT.testPolygonPolygon(aData, bData, response);
+		}
+		if (me.istank && b.iswall) {
+			collided = SAT.testPolygonPolygon(aData, bData, response);
+		}
+		if (me.isbullet && b.iswall) {
+			collided = SAT.testPolygonPolygon(aData, bData, response);
+		}
+		if (me.istank && b.isbullet && me.team != b.team) {
+			collided = SAT.testPolygonPolygon(aData, bData, response);
+		}
+		if (collided) {
+
+			if (me.istank && !b.isbullet) {
+				respondToCollision(me, b, response);
+			}
+		}
+	}
+};
+
+function respondToCollision(self, other, response) {
+	if (self.solid && other.solid) {
+		if (self.heavy) {
+			// Move the other object out of us
+			other.polygon.pos.add(response.overlapV);
+		}
+		else if (other.heavy) {
+			// Move us out of the other object
+			self.polygon.pos.sub(response.overlapV);
+		}
+		else {
+			// Move equally out of each other
+			response.overlapV.scale(0.5);
+			self.polygon.pos.sub(response.overlapV);
+			other.polygon.pos.add(response.overlapV);
+		}
+	}
+};
 setInterval(function() {
 	var pack = {
 		player: Player.update(),
 		bullet: Bullet.update(),
+		wall: Wall.update()
 	}
 
 	for (var i in SOCKET_LIST) {
