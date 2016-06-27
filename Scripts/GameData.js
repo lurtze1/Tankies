@@ -233,25 +233,7 @@ var game = function game() {
 
     //Constructor for a wall object.
     //Takes a topleft starting postion and a width and length.
-    var Wall = function (x, y, length, width) {
-
-
-        //Indicates if this object is solid for collition
-        this.solid = true;
-
-        //Indicates if this object cannot be moved
-        this.heavy = true;
-
-        this.width = width;
-
-        this.height = length;
-
-        this.iswall = true;
-        //Polygon holds angle, postion, size, offset.
-        this.polygon = P(V(x, y), [V(0, 0), V(length, 0), V(length, width), V(0, width)]);
-
-    };
-
+    
 
     //Creates a bullet.
     function Bullet(team, angle, pos, playerID) {
