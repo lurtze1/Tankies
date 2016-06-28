@@ -2,6 +2,8 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
+    var TO_RADIANS = Math.PI / 180;
+    var TO_DEGREES = 180 / Math.PI;
 	var ctx = document.getElementById("ctx").getContext("2d");
 	ctx.font = '30px Arial';
 
@@ -13,7 +15,7 @@
 			ctx.save();
 			ctx.translate(data.player[i].polygon.pos.x, data.player[i].polygon.pos.y);
 			// rotate around this point
-			ctx.rotate(-data.player[i].polygon.angle);
+			ctx.rotate(data.player[i].polygon.angle);
 			ctx.beginPath();
 			var entitypoint = data.player[i].polygon.points;
 			ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
