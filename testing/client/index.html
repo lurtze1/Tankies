@@ -1,17 +1,17 @@
 <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
 
-<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="http://localhost:2000/socket.io/socket.io.js"></script>
 <script>
-    var TO_RADIANS = Math.PI / 180;
-    var TO_DEGREES = 180 / Math.PI;
+	var TO_RADIANS = Math.PI / 180;
+	var TO_DEGREES = 180 / Math.PI;
 	var ctx = document.getElementById("ctx").getContext("2d");
 	ctx.font = '30px Arial';
 
 	var socket = io();
-
+	var i;
 	socket.on('newPositions', function(data) {
 		ctx.clearRect(0, 0, 500, 500);
-		for (var i = 0; i < data.player.length; i++) {
+		for (i = 0; i < data.player.length; i++) {
 			ctx.save();
 			ctx.translate(data.player[i].polygon.pos.x, data.player[i].polygon.pos.y);
 			// rotate around this point
@@ -19,8 +19,8 @@
 			ctx.beginPath();
 			var entitypoint = data.player[i].polygon.points;
 			ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
-			for (var i = 1; i < entitypoint.length; i++) {
-				ctx.lineTo(entitypoint[i].x, entitypoint[i].y);
+			for (ii = 1; ii < entitypoint.length; ii++) {
+				ctx.lineTo(entitypoint[ii].x, entitypoint[ii].y);
 			}
 			ctx.closePath();
 			ctx.fillStyle = "#4CD64C";
@@ -32,7 +32,7 @@
 
 			ctx.restore();
 		}
-		for (var i = 0; i < data.wall.length; i++) {
+		for (i = 0; i < data.wall.length; i++) {
 			ctx.save();
 			ctx.translate(data.wall[i].polygon.pos.x, data.wall[i].polygon.pos.y);
 			// rotate around this point
@@ -54,7 +54,24 @@
 			ctx.restore();
 		}
 		for (i = 0; i < data.bullet.length; i++) {
-			ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 10, 10);
+			ctx.save();
+			ctx.translate(data.bullet[i].polygon.pos.x, data.bullet[i].polygon.pos.y);
+			ctx.rotate(data.bullet[i].polygon.angle);
+			ctx.beginPath();
+			entitypoint = data.bullet[i].polygon.points;
+			ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
+			for (var ii = 1; ii < entitypoint.length; ii++) {
+				ctx.lineTo(entitypoint[ii].x, entitypoint[ii].y);
+			}
+			ctx.closePath();
+			ctx.fillStyle = "#4CD64C";
+
+			ctx.fill();
+			ctx.stroke();
+
+			ctx.clip();
+
+			ctx.restore();
 		}
 	});
 
@@ -106,10 +123,12 @@
 				state: false
 			});
 		else if (event.keyCode === 87) // w
+		{
 			socket.emit('keyPress', {
 				inputId: 'up',
 				state: false
 			});
+		}
 	}
 
 	document.onmousedown = function(event) {
