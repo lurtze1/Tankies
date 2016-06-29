@@ -65,6 +65,12 @@ io.sockets.on('connection', function(socket) {
 			}
 			if (Object.keys(possiblegame.playerlist).length >= maxplayers) {
 				possiblegame.dostartgame();
+				var playerlistlobby = possiblegame.playerlist;
+				for (var i in playerlistlobby) {
+					var player = playerlistlobby[i];
+					var sockets = SOCKET_LIST[player.playerID];
+						sockets.emit("WaitingDone");
+				};
 			}
 		}
 
@@ -102,7 +108,6 @@ var Game = function() {
 	var Player = function(x, y, playerID, angle) {
 		var self = Entity();
 		self.number = "" + Math.floor(10 * Math.random());
-		self.lifes = 3;
 		self.playerID = playerID;
 		self.ishit = false;
 		self.Cooldown = 60;
@@ -113,7 +118,7 @@ var Game = function() {
 		self.solid = true;
 		self.istank = true;
 		self.toRemove = false;
-		self.reloadtime = 4;
+		self.reloadtime = 24;
 		self.cooldown = 4;
 		self.turnspeed = 5 * TO_RADIANS;
 		self.polygon = P(V(x, y), [
@@ -134,6 +139,11 @@ var Game = function() {
 			}
 			if (self.pressingAttack && self.cooldown === 0) {
 				self.shootBullet();
+				for (var i in playerlist) {
+					var player = playerlist[i];
+					var socket = SOCKET_LIST[player.playerID];
+					socket.emit('Shoot');
+				}
 			}
 			Collision(self, bulletlist);
 			Collision(self, walllist);
@@ -209,9 +219,6 @@ var Game = function() {
 			else if (data.inputId === 'attack') {
 				player.pressingAttack = data.state;
 			}
-			else if (data.inputId === 'mouseAngle') {
-				player.mouseAngle = data.state;
-			}
 		});
 	};
 	Player.onDisconnect = function(socket) {
@@ -223,7 +230,7 @@ var Game = function() {
 			var player = playerlist[i];
 			if (player.toRemove) {
 				var socket = SOCKET_LIST[player.playerID];
-				socket.emit('Defeat', '/client/pages//Lose.html');
+				socket.emit('Defeat', '/client/Lose.html');
 				delete playerlist[i];
 			}
 			player.update();
@@ -277,7 +284,7 @@ var Game = function() {
 		self.isbullet = true;
 		self.angle = angle;
 		self.polygon = new P(V(x, y), [V(0, 0), V(self.width, 0), V(self.width, self.height), V(0, self.height)]);
-		self.speed = 10;
+		self.speed = 5;
 		self.polygon.angle = angle;
 		self.polygon.translate(-self.width / 2, -self.height / 2);
 		self.polygon._recalc();
@@ -397,7 +404,7 @@ var Game = function() {
 				var player = playerlist[i];
 				var socket = SOCKET_LIST[player.playerID];
 				if (Object.keys(playerlist).length <= 1) {
-					socket.emit('Victory', '/client/pages/Win.html');
+					socket.emit('Victory', '/client/Win.html');
 					endgame();
 				}
 				socket.emit('newPositions', pack);

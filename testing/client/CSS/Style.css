@@ -1,7 +1,7 @@
 html,
 body {
     text-align: center;
-    background-color:grey;
+    background-color: #000000;
 }
 
 @font-face {
@@ -47,6 +47,7 @@ h1 {
 
 .menuitems td {
     padding: 10px;
+    text-align: center;
 }
 
 .menuitems a:hover {
@@ -111,7 +112,12 @@ h1 {
         border: 1px solid lime;
     }
 }
-
+.playerfound{
+    display: none;
+}
+#ctx{
+    padding: 10px;
+}
 @media only screen and (min-device-height: 1080px) {
     .menu {
         background: rgba(0, 255, 0, 0.5);
