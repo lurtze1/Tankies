@@ -4,9 +4,9 @@ var serv = require('http').Server(app);
 var SAT = require('./Libs/SAT.js');
 var $ = require('./Libs/jquery');
 app.get('/', function(req, res) {
-	res.sendFile(__dirname + '/client/index.html');
+	res.sendFile(__dirname + '/index.html');
 });
-app.use('/client', express.static(__dirname + '/client'));
+app.use('/', express.static(__dirname + '/'));
 
 serv.listen(2000);
 console.log("Server started.");
@@ -223,7 +223,7 @@ var Game = function() {
 			var player = playerlist[i];
 			if (player.toRemove) {
 				var socket = SOCKET_LIST[player.playerID];
-				socket.emit('Defeat', '/client/Lose.html');
+				socket.emit('Defeat', '/client/pages//Lose.html');
 				delete playerlist[i];
 			}
 			player.update();
@@ -397,7 +397,7 @@ var Game = function() {
 				var player = playerlist[i];
 				var socket = SOCKET_LIST[player.playerID];
 				if (Object.keys(playerlist).length <= 1) {
-					socket.emit('Victory', '/client/Win.html');
+					socket.emit('Victory', '/client/pages/Win.html');
 					endgame();
 				}
 				socket.emit('newPositions', pack);
@@ -413,4 +413,3 @@ var Game = function() {
 		doendgame: endgame
 	}
 };
-

@@ -1,0 +1,142 @@
+html,
+body {
+    text-align: center;
+    background-color:grey;
+}
+
+@font-face {
+    font-family: 'Neon';
+    src: url(IRONLOUNGE2.ttf);
+}
+
+.whiteletters {
+    color: white;
+}
+
+a {
+    text-decoration: none;
+    margin: 0;
+    font-family: Neon;
+    color: lime;
+    font-size: 350%;
+}
+
+h1 {
+    margin: 0;
+    font-family: Neon;
+    color: lime;
+    font-size: 750%;
+}
+
+.title {
+    background: rgba(0, 255, 0, 0.5);
+    margin-top: 100px;
+    border: 1px solid lime;
+}
+
+.menu {
+    background: rgba(0, 255, 0, 0.5);
+    margin-top: 100px;
+    border: 1px solid lime;
+}
+
+.menuitems {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.menuitems td {
+    padding: 10px;
+}
+
+.menuitems a:hover {
+    color: rgba(0, 255, 0, 0.5);
+}
+
+@media only screen and (min-device-height: 720px) {
+    a {
+        text-decoration: none;
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 175%;
+    }
+
+    h1 {
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 375%;
+    }
+
+    .title {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 50px;
+        border: 1px solid lime;
+    }
+
+    .menu {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 50px;
+        border: 1px solid lime;
+    }
+}
+
+@media only screen and (min-device-height: 900px) {
+    a {
+        text-decoration: none;
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 200%;
+    }
+
+    h1 {
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 400%;
+
+    }
+
+    .title {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 75px;
+        border: 1px solid lime;
+    }
+
+    .menu {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 75px;
+        border: 1px solid lime;
+    }
+}
+
+@media only screen and (min-device-height: 1080px) {
+    .menu {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 100px;
+        border: 1px solid lime;
+    }
+
+    .title {
+        background: rgba(0, 255, 0, 0.5);
+        margin-top: 100px;
+        border: 1px solid lime;
+    }
+
+    h1 {
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 750%;
+    }
+
+    a {
+        text-decoration: none;
+        margin: 0;
+        font-family: Neon;
+        color: lime;
+        font-size: 350%;
+    }
+}
