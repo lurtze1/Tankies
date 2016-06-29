@@ -28,52 +28,52 @@ var P = function(pos, points) {
 var maxplayers = 2;
 var Games = [];
 var io = require('socket.io')(serv, {});
+
 io.sockets.on('connection', function(socket) {
 	socket.id = Math.random();
 	SOCKET_LIST[socket.id] = socket;
-	if (Games.length < 1 || Object.keys(Games[Games.length - 1].playerlist).length >= maxplayers) {
-		var newgame = new Game();
-		newgame.playerconnect(socket);
-		socket.on('disconnect', function() {
-			delete SOCKET_LIST[socket.id];
-			newgame.playerdisconnect(socket);
-		});
-		Games.push(newgame);
-	}
-	else {
-		for (i = 0; i < Games.length; i++) {
-			var possiblegame = Games[i];
-			if (Object.keys(possiblegame.playerlist).length < maxplayers) {
-				possiblegame.playerconnect(socket);
-				socket.on('disconnect', function() {
-					possiblegame.playerdisconnect(socket);
-					if (Object.keys(possiblegame.playerlist).length <= 0) {
-						var index = Games.indexOf(possiblegame);
-						if (index > -1) {
-							Games.splice(index, 1);
-						}
+	//Checks if there are no current games or if the last game on the list is full
+	for (i = 0; i < Games.length; i++) {
+		var possibleGame = Games[i];
+		if (Object.keys(possibleGame.playerlist).length < maxplayers) {
+			possibleGame.playerconnect(socket);
+			socket.on('disconnect', function() {
+				possibleGame.playerdisconnect(socket);
+				if (Object.keys(possibleGame.playerlist).length <= 0) {
+					var index = Games.indexOf(possibleGame);
+					if (index > -1) {
+						Games.splice(index, 1);
 					}
-					delete SOCKET_LIST[socket.id];
-				});
-			}
-			if (Object.keys(possiblegame.playerlist).length >= maxplayers) {
-				possiblegame.dostartgame();
-				var playerlistlobby = possiblegame.playerlist;
-				for (var i in playerlistlobby) {
-					var player = playerlistlobby[i];
-					var sockets = SOCKET_LIST[player.playerID];
-					sockets.emit("WaitingDone");
 				}
+				delete SOCKET_LIST[socket.id];
+			});
+		}
+		if (Object.keys(possibleGame.playerlist).length >= maxplayers) {
+			possibleGame.dostartgame();
+			var playerListLobby = possibleGame.playerlist;
+			for (var i in playerListLobby) {
+				var player = playerListLobby[i];
+				var sockets = SOCKET_LIST[player.playerID];
+				sockets.emit("WaitingDone");
 			}
 		}
-
 	}
+	if (Games.length < 1 || Object.keys(Games[Games.length - 1].playerlist).length >= maxplayers) {
+		var newGame = new Game();
+		newGame.playerconnect(socket);
+		socket.on('disconnect', function() {
+			delete SOCKET_LIST[socket.id];
+			newGame.playerdisconnect(socket);
+		});
+		Games.push(newGame);
+	}
+
 });
 var Game = function() {
-	var playerlist = {};
-	var bulletlist = {};
-	var walllist = {};
-	var gameloop;
+	var playerList = {};
+	var bulletList = {};
+	var wallList = {};
+	var gameLoop;
 	var Entity = function() {
 		var self = {
 			width: undefined,
@@ -91,9 +91,6 @@ var Game = function() {
 			self.polygon.pos.x += self.spdX;
 			self.polygon.pos.y -= self.spdY;
 			self.polygon._recalc();
-		};
-		self.getDistance = function(pt) {
-			return Math.sqrt(Math.pow(self.polygon.pos.x - pt.polygon.pos.x, 2) + Math.pow(self.polygon.pos.y - pt.polygon.pos.y, 2));
 		};
 		return self;
 	};
@@ -129,15 +126,15 @@ var Game = function() {
 			}
 			if (self.pressingAttack && self.cooldown === 0) {
 				self.shootBullet();
-				for (var i in playerlist) {
-					var player = playerlist[i];
+				for (var i in playerList) {
+					var player = playerList[i];
 					var socket = SOCKET_LIST[player.playerID];
 					socket.emit('Shoot');
 				}
 			}
-			Collision(self, bulletlist);
-			Collision(self, walllist);
-			Collision(self, playerlist);
+			Collision(self, bulletList);
+			Collision(self, wallList);
+			Collision(self, playerList);
 		};
 		self.shootBullet = function() {
 			self.cooldown = self.reloadtime;
@@ -175,22 +172,22 @@ var Game = function() {
 			}
 			self.polygon._recalc();
 		};
-		playerlist[playerID] = self;
+		playerList[playerID] = self;
 		return self;
 	};
 	Player.onConnect = function(socket) {
-		var playerlistlength = Object.keys(playerlist).length;
+		var playerListLength = Object.keys(playerList).length;
 		var player;
-		if (playerlistlength === 0) {
+		if (playerListLength === 0) {
 			player = Player(100, 100, socket.id);
 		}
-		else if (playerlistlength === 1) {
+		else if (playerListLength === 1) {
 			player = Player(300, 300, socket.id, 180 * TO_RADIANS);
 		}
-		else if (playerlistlength === 2) {
+		else if (playerListLength === 2) {
 			player = Player(100, 300, socket.id, 180 * TO_RADIANS);
 		}
-		else if (playerlistlength === 3) {
+		else if (playerListLength === 3) {
 			player = Player(300, 100, socket.id, 180 * TO_RADIANS);
 		}
 		socket.on('keyPress', function(data) {
@@ -212,16 +209,16 @@ var Game = function() {
 		});
 	};
 	Player.onDisconnect = function(socket) {
-		delete playerlist[socket.id];
+		delete playerList[socket.id];
 	};
 	Player.update = function() {
 		var pack = [];
-		for (var i in playerlist) {
-			var player = playerlist[i];
+		for (var i in playerList) {
+			var player = playerList[i];
 			if (player.toRemove) {
 				var socket = SOCKET_LIST[player.playerID];
 				socket.emit('Defeat', '/client/Lose.html');
-				delete playerlist[i];
+				delete playerList[i];
 			}
 			player.update();
 			pack.push({
@@ -242,14 +239,14 @@ var Game = function() {
 		self.iswall = true;
 		self.polygon = P(V(x, y), [V(0, 0), V(length, 0), V(length, width), V(0, width)]);
 		self.polygon._recalc();
-		walllist[self.id] = self;
+		wallList[self.id] = self;
 		return self;
 
 	};
 	Wall.update = function() {
 		var pack = [];
-		for (var i in walllist) {
-			var wall = walllist[i];
+		for (var i in wallList) {
+			var wall = wallList[i];
 
 			pack.push({
 				polygon: wall.polygon
@@ -280,7 +277,7 @@ var Game = function() {
 		var super_update = self.update;
 		self.update = function() {
 			self.updateSpd();
-			Collision(self, walllist);
+			Collision(self, wallList);
 			if (self.timer++ > 100) {
 				self.toRemove = true;
 			}
@@ -292,17 +289,17 @@ var Game = function() {
 			self.polygon._recalc();
 		};
 
-		bulletlist[self.id] = self;
+		bulletList[self.id] = self;
 		return self;
 	}
 
 	Bullet.update = function() {
 		var pack = [];
-		for (var i in bulletlist) {
-			var bullet = bulletlist[i];
+		for (var i in bulletList) {
+			var bullet = bulletList[i];
 			bullet.update();
 			if (bullet.toRemove) {
-				delete bulletlist[i];
+				delete bulletList[i];
 			}
 			else {
 				pack.push({
@@ -315,8 +312,6 @@ var Game = function() {
 	function Collision(me, entities) {
 		for (var iii = 0; iii < 2; iii++) {
 			var response = new SAT.Response();
-			// Naively check for collision between all pairs of entities
-			// E.g if there are 4 entities: (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
 			for (var i in entities) {
 				var b = entities[i];
 				var collided;
@@ -379,20 +374,20 @@ var Game = function() {
 	}
 
 	function endgame() {
-		clearInterval(gameloop);
+		clearInterval(gameLoop);
 	}
 
 	function tickgame() {
-		gameloop = setInterval(function() {
+		gameLoop = setInterval(function() {
 			var pack = {
 				player: Player.update(),
 				bullet: Bullet.update(),
 				wall: Wall.update()
 			};
-			for (var i in playerlist) {
-				var player = playerlist[i];
+			for (var i in playerList) {
+				var player = playerList[i];
 				var socket = SOCKET_LIST[player.playerID];
-				if (Object.keys(playerlist).length <= 1) {
+				if (Object.keys(playerList).length <= 1) {
 					socket.emit('Victory', '/client/Win.html');
 					endgame();
 				}
@@ -404,7 +399,7 @@ var Game = function() {
 	return {
 		playerconnect: Player.onConnect,
 		playerdisconnect: Player.onDisconnect,
-		playerlist: playerlist,
+		playerlist: playerList,
 		dostartgame: tickgame,
 		doendgame: endgame
 	}
