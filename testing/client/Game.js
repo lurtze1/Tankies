@@ -12,7 +12,6 @@ socket.on('newPositions', function(data) {
     for (i = 0; i < data.player.length; i++) {
         ctx.save();
         ctx.translate(data.player[i].polygon.pos.x, data.player[i].polygon.pos.y);
-        // rotate around this point
         ctx.rotate(data.player[i].polygon.angle);
         ctx.beginPath();
         var entitypoint = data.player[i].polygon.points;

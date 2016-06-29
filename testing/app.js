@@ -12,26 +12,19 @@ serv.listen(2000);
 console.log("Server started.");
 
 var SOCKET_LIST = {};
-//Bron http://creativejs.com/2011/12/to-radians/index.html
-// One degree in radians
+
 var TO_RADIANS = Math.PI / 180;
 
-// One radian in degrees
 var TO_DEGREES = 180 / Math.PI;
 
 var V = function(x, y) {
 	return new SAT.Vector(x, y);
 };
 
-// Contructor for Polygon, made shorter for simplicity
 var P = function(pos, points) {
 	return new SAT.Polygon(pos, points);
 };
 
-// Contructor for Circle, made shorter for simplicity
-var C = function(pos, r) {
-	return new SAT.Circle(pos, r);
-};
 var maxplayers = 2;
 var Games = [];
 var io = require('socket.io')(serv, {});
@@ -48,7 +41,7 @@ io.sockets.on('connection', function(socket) {
 		Games.push(newgame);
 	}
 	else {
-		for (var i = 0; i < Games.length; i++) {
+		for (i = 0; i < Games.length; i++) {
 			var possiblegame = Games[i];
 			if (Object.keys(possiblegame.playerlist).length < maxplayers) {
 				possiblegame.playerconnect(socket);
@@ -69,8 +62,8 @@ io.sockets.on('connection', function(socket) {
 				for (var i in playerlistlobby) {
 					var player = playerlistlobby[i];
 					var sockets = SOCKET_LIST[player.playerID];
-						sockets.emit("WaitingDone");
-				};
+					sockets.emit("WaitingDone");
+				}
 			}
 		}
 
@@ -89,7 +82,7 @@ var Game = function() {
 			polygon: undefined,
 			playerID: undefined,
 			solid: undefined,
-			heavy: undefined,
+			heavy: undefined
 		};
 		self.update = function() {
 			self.updatePosition();
@@ -109,9 +102,6 @@ var Game = function() {
 		var self = Entity();
 		self.number = "" + Math.floor(10 * Math.random());
 		self.playerID = playerID;
-		self.ishit = false;
-		self.Cooldown = 60;
-		self.CurrentCooldown = 60;
 		self.speed = 2;
 		self.width = 20;
 		self.height = 20;
@@ -201,7 +191,7 @@ var Game = function() {
 			player = Player(100, 300, socket.id, 180 * TO_RADIANS);
 		}
 		else if (playerlistlength === 3) {
-			player = Player(300, 1+00, socket.id, 180 * TO_RADIANS);
+			player = Player(300, 100, socket.id, 180 * TO_RADIANS);
 		}
 		socket.on('keyPress', function(data) {
 			if (data.inputId === 'left') {
@@ -282,7 +272,6 @@ var Game = function() {
 		self.height = 10;
 		self.solid = true;
 		self.isbullet = true;
-		self.angle = angle;
 		self.polygon = new P(V(x, y), [V(0, 0), V(self.width, 0), V(self.width, self.height), V(0, self.height)]);
 		self.speed = 5;
 		self.polygon.angle = angle;
