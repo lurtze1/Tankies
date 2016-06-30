@@ -4,10 +4,11 @@
 var TO_RADIANS = Math.PI / 180;
 var TO_DEGREES = 180 / Math.PI;
 var ctx = document.getElementById("ctx").getContext("2d");
-
 var socket = io();
 var i;
-socket.on('newPositions', function(data) {
+//Render
+socket.on('newPositions', function (data) {
+    //Render canvas
     ctx.clearRect(0, 0, 500, 500);
     for (i = 0; i < data.player.length; i++) {
         ctx.save();
@@ -21,14 +22,12 @@ socket.on('newPositions', function(data) {
         }
         ctx.closePath();
         ctx.fillStyle = "lime";
-
         ctx.fill();
         ctx.stroke();
-
         ctx.clip();
-
         ctx.restore();
     }
+    //Render wall
     for (i = 0; i < data.wall.length; i++) {
         ctx.save();
         ctx.translate(data.wall[i].polygon.pos.x, data.wall[i].polygon.pos.y);
@@ -42,14 +41,12 @@ socket.on('newPositions', function(data) {
         }
         ctx.closePath();
         ctx.fillStyle = "lime";
-
         ctx.fill();
         ctx.stroke();
-
         ctx.clip();
-
         ctx.restore();
     }
+    //Render bullit
     for (i = 0; i < data.bullet.length; i++) {
         ctx.save();
         ctx.translate(data.bullet[i].polygon.pos.x, data.bullet[i].polygon.pos.y);
@@ -62,40 +59,40 @@ socket.on('newPositions', function(data) {
         }
         ctx.closePath();
         ctx.fillStyle = "#FF0000";
-
         ctx.fill();
         ctx.stroke();
-
         ctx.clip();
-
         ctx.restore();
     }
 });
-
-socket.on('Victory', function(destination) {
+//Redirect for Victory
+socket.on('Victory', function (destination) {
     window.location.href = destination;
 });
-
-socket.on('Defeat', function(destination) {
+//Redirect for defeat
+socket.on('Defeat', function (destination) {
     window.location.href = destination;
 });
-socket.on('Shoot', function() {
+//After a player shoots in the game play sound
+socket.on('Shoot', function () {
     var shoot = new Audio('sounds/shoot.mp3');
     shoot.play();
 });
-socket.on('WaitingDone', function() {
-    $( "#Waiting").remove();
-    $( "#loader").remove();
-    $( "#ctx").removeClass('hide');
+// After an opponent is found remove waiting feedback
+socket.on('WaitingDone', function () {
+    $("#Waiting").remove();
+    $("#loader").remove();
+    $("#ctx").removeClass('hide');
     var backgroundmusic = new Audio('sounds/background.mp3');
-    backgroundmusic.addEventListener('ended', function() {
+    backgroundmusic.addEventListener('ended', function () {
         this.currentTime = 0;
         this.volume = 0.1;
         this.play();
     }, false);
     backgroundmusic.play();
 });
-document.onkeydown = function(event) {
+//Game controlls pressed
+document.onkeydown = function (event) {
     if (event.keyCode === 68)    //d
     {
         socket.emit('keyPress', {
@@ -124,7 +121,7 @@ document.onkeydown = function(event) {
             state: true
         });
     }
-    else if (event.keyCode === 32) // w
+    else if (event.keyCode === 32) // space
     {
         socket.emit('keyPress', {
             inputId: 'attack',
@@ -133,7 +130,8 @@ document.onkeydown = function(event) {
     }
 
 };
-document.onkeyup = function(event) {
+//Game controlls released
+document.onkeyup = function (event) {
     if (event.keyCode === 68) {  //d
         socket.emit('keyPress', {
             inputId: 'right',
@@ -162,7 +160,7 @@ document.onkeyup = function(event) {
             state: false
         });
     }
-    else if (event.keyCode === 32) // w
+    else if (event.keyCode === 32) // space
     {
         socket.emit('keyPress', {
             inputId: 'attack',

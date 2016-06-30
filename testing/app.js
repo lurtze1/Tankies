@@ -38,7 +38,6 @@ io.sockets.on('connection', function (socket) {
         var possibleGame = Games[i];
         if (Object.keys(possibleGame.playerlist).length < maxplayers) {
             joinedgame = true;
-            console.log(Object.keys(possibleGame.playerlist).length);
             possibleGame.playerconnect(socket);
             socket.on('disconnect', function () {
                 possibleGame.playerdisconnect(socket);
@@ -51,6 +50,7 @@ io.sockets.on('connection', function (socket) {
                 delete SOCKET_LIST[socket.id];
             });
         }
+
         //checks if a game needs to be started.
         if (Object.keys(possibleGame.playerlist).length >= maxplayers) {
             possibleGame.dostartgame();
@@ -63,9 +63,9 @@ io.sockets.on('connection', function (socket) {
         }
 
     }
+
     //checks if there isn't a game yet or if the last game in the list is full. Also checks if the player hasn't already joined a game.
     if (Games.length < 1 && !joinedgame || Object.keys(Games[Games.length - 1].playerlist).length >= maxplayers && !joinedgame) {
-        console.log('newgame');
         var newGame = new Game();
         newGame.playerconnect(socket);
         socket.on('disconnect', function () {
@@ -97,9 +97,11 @@ var Game = function () {
             solid: undefined,
             heavy: undefined
         };
+
         self.update = function () {
             self.updatePosition();
         };
+
         self.updatePosition = function () {
             self.polygon.pos.x += self.spdX;
             self.polygon.pos.y -= self.spdY;
@@ -125,12 +127,14 @@ var Game = function () {
             V(0, 0), V(self.width, 0), V(self.width + 10, self.height / 2), V(self.width, self.height),
             V(0, self.height)
         ]);
+
         self.polygon.translate(-self.width / 2, -self.height / 2);
         if (angle) {
             self.polygon.angle = angle;
         }
         self.polygon._recalc();
         var super_update = self.update;
+
         self.update = function () {
             self.updateSpd();
             super_update();
@@ -188,6 +192,7 @@ var Game = function () {
         playerList[playerID] = self;
         return self;
     };
+
     Player.onConnect = function (socket) {
         var playerListLength = Object.keys(playerList).length;
         var player;
@@ -197,6 +202,7 @@ var Game = function () {
         else if (playerListLength === 1) {
             player = Player(400, 400, socket.id, 180 * TO_RADIANS);
         }
+
         socket.on('keyPress', function (data) {
             if (data.inputId === 'left') {
                 player.pressingLeft = data.state;
@@ -215,9 +221,11 @@ var Game = function () {
             }
         });
     };
+
     Player.onDisconnect = function (socket) {
         delete playerList[socket.id];
     };
+
     Player.update = function () {
         var pack = [];
         for (var i in playerList) {
@@ -262,10 +270,12 @@ var Game = function () {
         }
         return pack;
     };
+    //wall locations
     Wall(0, 0, 480, 20);
     Wall(20, 480, 500, 20);
     Wall(480, 0, 20, 480);
     Wall(0, 20, 20, 500);
+
     function Bullet(parent, angle, x, y, playerID) {
         var self = Entity();
         self.parent = parent;
@@ -315,6 +325,7 @@ var Game = function () {
         }
         return pack;
     };
+
     function Collision(me, entities) {
         for (var iii = 0; iii < 2; iii++) {
             var response = new SAT.Response();
