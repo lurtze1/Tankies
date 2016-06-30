@@ -3,27 +3,31 @@ body {
     text-align: center;
     background-color: #000000;
 }
-
+.noscroll{
+    overflow: hidden
+}
 @font-face {
     font-family: 'Neon';
     src: url(IRONLOUNGE2.ttf);
 }
-
-.whiteletters {
-    color: white;
+.hide{
+    display: none;
 }
-
+h2{
+    color: lime;
+}
+.neonfont{
+    font-family: Neon;
+}
 a {
     text-decoration: none;
     margin: 0;
-    font-family: Neon;
     color: lime;
     font-size: 350%;
 }
 
 h1 {
     margin: 0;
-    font-family: Neon;
     color: lime;
     font-size: 750%;
 }
@@ -48,28 +52,59 @@ h1 {
 .menuitems td {
     padding: 10px;
     text-align: center;
+    color: lime;
 }
 
 .menuitems a:hover {
     color: rgba(0, 255, 0, 0.5);
 }
-
-@media only screen and (min-device-height: 720px) {
+.resultlinks {
+    font-size: 100%;
+}
+#loader {
+    margin:auto;
+    border: 16px solid rgba(0, 255, 0, 0.5);
+    border-radius: 50%;
+    border-top: 16px solid lime;
+    width: 100px;
+    height: 100px;
+    animation: progress 2s linear infinite;
+}
+@keyframes progress {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.searching{
+    font-family: Neon;
+    color: lime;
+    font-size: 350%;
+}
+.playerfound{
+    display: none;
+}
+#ctx{
+    padding-top: 100px;
+}
+@media only screen and (max-device-height: 720px) {
     a {
         text-decoration: none;
         margin: 0;
-        font-family: Neon;
         color: lime;
         font-size: 175%;
     }
-
+    .searching{
+        font-size: 175%;
+    }
     h1 {
         margin: 0;
         font-family: Neon;
         color: lime;
         font-size: 375%;
     }
-
+    #ctx{
+        padding-top: 10px;
+        transform: scale(0.75);
+    }
     .title {
         background: rgba(0, 255, 0, 0.5);
         margin-top: 50px;
@@ -79,6 +114,7 @@ h1 {
     .menu {
         background: rgba(0, 255, 0, 0.5);
         margin-top: 50px;
+        margin-bottom: 50px;
         border: 1px solid lime;
     }
 }
@@ -87,8 +123,10 @@ h1 {
     a {
         text-decoration: none;
         margin: 0;
-        font-family: Neon;
         color: lime;
+        font-size: 200%;
+    }
+    .searching{
         font-size: 200%;
     }
 
@@ -111,12 +149,6 @@ h1 {
         margin-top: 75px;
         border: 1px solid lime;
     }
-}
-.playerfound{
-    display: none;
-}
-#ctx{
-    padding: 10px;
 }
 @media only screen and (min-device-height: 1080px) {
     .menu {
@@ -141,8 +173,10 @@ h1 {
     a {
         text-decoration: none;
         margin: 0;
-        font-family: Neon;
         color: lime;
+        font-size: 350%;
+    }
+    .searching{
         font-size: 350%;
     }
 }

@@ -37,7 +37,7 @@ socket.on('newPositions', function(data) {
         ctx.beginPath();
         entitypoint = data.wall[i].polygon.points;
         ctx.moveTo(entitypoint[0].x, entitypoint[0].y);
-        for (var ii = 1; ii < entitypoint.length; ii++) {
+        for (ii = 1; ii < entitypoint.length; ii++) {
             ctx.lineTo(entitypoint[ii].x, entitypoint[ii].y);
         }
         ctx.closePath();
@@ -85,6 +85,8 @@ socket.on('Shoot', function() {
 });
 socket.on('WaitingDone', function() {
     $( "#Waiting").remove();
+    $( "#loader").remove();
+    $( "#ctx").removeClass('hide');
     var backgroundmusic = new Audio('sounds/background.mp3');
     backgroundmusic.addEventListener('ended', function() {
         this.currentTime = 0;
@@ -132,11 +134,13 @@ document.onkeydown = function(event) {
 
 };
 document.onkeyup = function(event) {
-    if (event.keyCode === 68)    //d
+    if (event.keyCode === 68) {  //d
         socket.emit('keyPress', {
             inputId: 'right',
             state: false
+
         });
+    }
     else if (event.keyCode === 83)   //s
     {
         socket.emit('keyPress', {
@@ -165,6 +169,6 @@ document.onkeyup = function(event) {
             state: false
         });
     }
-}
+};
 
 

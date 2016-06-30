@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Tankies</title>
@@ -8,15 +9,16 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 </head>
-<body>
-<div>
+<body class="noscroll">
     <article>
         <header class="title"><h1>Tankies </h1></header>
-        <p id="Waiting">Waiting for other players.</p>
+        <p id="Waiting" class="searching">Searching for another player.</p>
+        <div id="loader">
+
+        </div>
     </article>
-    <canvas id="ctx" width="500" height="500"></canvas>
+    <canvas id="ctx" class="hide" width="500" height="500"></canvas>
     <script src="Game.js">
     </script>
-</div>
 </body>
 </html>

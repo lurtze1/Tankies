@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 var SAT = require('./Libs/SAT.js');
-var $ = require('./Libs/jquery');
+var $ = require('./../testmap/jquery');
 app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
@@ -99,13 +99,13 @@ var Game = function() {
 		var self = Entity();
 		self.number = "" + Math.floor(10 * Math.random());
 		self.playerID = playerID;
-		self.speed = 2;
+		self.speed = 1;
 		self.width = 20;
 		self.height = 20;
 		self.solid = true;
 		self.istank = true;
 		self.toRemove = false;
-		self.reloadtime = 24;
+		self.reloadtime = 48;
 		self.cooldown = 4;
 		self.turnspeed = 5 * TO_RADIANS;
 		self.polygon = P(V(x, y), [
@@ -182,13 +182,7 @@ var Game = function() {
 			player = Player(100, 100, socket.id);
 		}
 		else if (playerListLength === 1) {
-			player = Player(300, 300, socket.id, 180 * TO_RADIANS);
-		}
-		else if (playerListLength === 2) {
-			player = Player(100, 300, socket.id, 180 * TO_RADIANS);
-		}
-		else if (playerListLength === 3) {
-			player = Player(300, 100, socket.id, 180 * TO_RADIANS);
+			player = Player(400, 400, socket.id, 180 * TO_RADIANS);
 		}
 		socket.on('keyPress', function(data) {
 			if (data.inputId === 'left') {
@@ -259,7 +253,6 @@ var Game = function() {
 	Wall(20, 480, 500, 20);
 	Wall(480, 0, 20, 480);
 	Wall(0, 20, 20, 500);
-
 	function Bullet(parent, angle, x, y, playerID) {
 		var self = Entity();
 		self.parent = parent;

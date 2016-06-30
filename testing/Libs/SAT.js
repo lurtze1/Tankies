@@ -560,7 +560,7 @@
      * @type {Array.<Array.<number>>}
      */
     var T_ARRAYS = [];
-    for (var i = 0; i < 5; i++) {
+    for (i = 0; i < 5; i++) {
         T_ARRAYS.push([]);
     }
 
@@ -666,8 +666,8 @@
                     response['aInB'] = false;
                     // A is fully inside B.  Pick the shortest way out.
                 } else {
-                    var option1 = rangeA[1] - rangeB[0];
-                    var option2 = rangeB[1] - rangeA[0];
+                    option1 = rangeA[1] - rangeB[0];
+                    option2 = rangeB[1] - rangeA[0];
                     overlap = option1 < option2 ? option1 : -option2;
                 }
             }
@@ -880,7 +880,7 @@
                 region = voronoiRegion(edge, point);
                 if (region === LEFT_VORONOI_REGION) {
                     // It's in the region we want.  Check if the circle intersects the point.
-                    var dist = point.len();
+                    dist = point.len();
                     if (dist > radius) {
                         // No intersection
                         T_VECTORS.push(circlePos);
@@ -901,7 +901,7 @@
                 var normal = edge.perp().normalize();
                 // Find the perpendicular distance between the center of the
                 // circle and the edge.
-                var dist = point.dot(normal);
+                dist = point.dot(normal);
                 var distAbs = Math.abs(dist);
                 // If the circle is on the outside of the edge, there is no intersection.
                 if (dist > 0 && distAbs > radius) {
@@ -994,7 +994,7 @@
             }
         }
         // If any of the edge normals of B is a separating axis, no intersection.
-        for (var i = 0; i < bLen; i++) {
+        for (i = 0; i < bLen; i++) {
             if (isSeparatingAxis(a['pos'], b['pos'], aPoints, bPoints, b['normals'][i], response)) {
                 return false;
             }
